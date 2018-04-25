@@ -1,5 +1,5 @@
-// 原作者：wlor0623  https://github.com/wlor0623/jsbox/edit/master/lolscore.js
-// 由 QvQ修改： https://github.com/FrankHan/jsbox/blob/master/LOL%20All.js
+// 原作者：wlor0623，  https://github.com/wlor0623/jsbox/edit/master/lolscore.js
+// 由 QvQ修改： https://github.com/FrankHan/jsbox/blob/master/LOL%20All.js  
 
 var resp = []
 $http.post({
@@ -81,8 +81,24 @@ function render(resp, dateIndex) {
     //console.log(key)  //打印日期
     timeDataArr.push(scheduleList[key]);
   }
+
+
+  // ---无比赛过滤器
+  var timeTArr=[];
+  var timeTDataArr=[];
+  var timeForHeaderT=[];
+  for (var i = 0; i < timeDataArr.length; i++) {
+    if (timeDataArr[i].list != false){
+      timeTArr.push(timeArr[i]);
+      timeForHeaderT.push(timeForHeader[i]); 
+      timeTDataArr.push(timeDataArr[i]);
+    }
+  }
+  // ---过滤器end
+
+
    // console.log(timeArr)
-  var toDayData = timeDataArr[dateIndex]; //当天数据
+  var toDayData = timeTDataArr[dateIndex]; //当天数据 
   var headerDateTip = toDayData.lDate; //头部日期提示
   
   //console.log(headerDateTip)
@@ -113,8 +129,8 @@ function render(resp, dateIndex) {
     views: [{
         type: "menu",
         props: {
-          //items: timeArr,
-          items: timeForHeader,
+          //items: timeTArr,
+          items: timeForHeaderT,
           index: dateIndex
         },
         layout: function(make) {
