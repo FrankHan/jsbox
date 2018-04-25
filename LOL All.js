@@ -1,5 +1,5 @@
 // 原作者：wlor0623  https://github.com/wlor0623/jsbox/edit/master/lolscore.js
-// 由 QvQ修改： https://github.com/FrankHan/jsbox/edit/master/lolscore.js
+// 由 QvQ修改： https://github.com/FrankHan/jsbox/blob/master/LOL%20All.js
 
 var resp = []
 $http.post({
