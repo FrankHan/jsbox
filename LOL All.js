@@ -23,43 +23,55 @@ $http.post({
     game: 2,
     eids: ""
   },
-  handler: function(resp) {
+  handler: function (resp) {
     resp = resp;
     var data = resp.data
 
-  console.log(data)
-  
-  var scheduleList = data.data.scheduleList;
-  for (var k in scheduleList) {
-    
-    if (scheduleList[k].week == "今天")  {
-      console.log(k)
-      var todayDateStore = k
+    console.log(data)
+
+    var scheduleList = data.data.scheduleList;
+    for (var k in scheduleList) {
+      if (scheduleList[k].week == "今天") {
+        // console.log(k)
+        var todayDateStore = k
+      }
     }
-    
-    
-  }
-  
-  var timeArr = [] //取时间值
-  var timeDataArr = []; //数据值
-  
-  for (var key in scheduleList) {
-    timeArr.push(key);
-    
-    
-    //timeDataArr.push(scheduleList[key]);
-    //console.log(timeDataArr)
-  }
-  
-  for (var i=0;i<timeArr.length;i++){
-    if (timeArr[i] == todayDateStore){
-      console.log(i)    
-      render(resp, i);
+
+    console.log(todayDateStore)
+
+    var timeArr = [] //取时间值
+    var timeDataArr = []; //数据值
+
+    for (var key in scheduleList) {
+      timeArr.push(key);
+      timeDataArr.push(scheduleList[key]);
     }
-  }
-  
-  
-  
+
+    // ---无比赛过滤器
+    var timeTArr = [];
+    var timeTDataArr = [];
+    var timeForHeaderT = [];
+    for (var i = 0; i < timeDataArr.length; i++) {
+      if (timeDataArr[i].list != false) {
+        timeTArr.push(timeArr[i]);
+        // timeForHeaderT.push(timeForHeader[i]);
+        // timeTDataArr.push(timeDataArr[i]);
+      }
+    }
+    // ---过滤器end
+
+    console.log(timeTArr)
+
+    for (var i = 0; i < timeTArr.length; i++) {
+      if (timeTArr[i] >= todayDateStore) {
+        console.log(i); //定位到最近一天
+        render(resp, i);
+        break;
+      }
+    }
+
+
+
     //render(resp, 0);
   }
 })
@@ -67,7 +79,7 @@ $http.post({
 function render(resp, dateIndex) {
   var data = resp.data
 
-//  console.log(data)
+  //  console.log(data)
   var prevdate = data.data.prevdate; //上周时间
   var nextdate = data.data.nextdate; //下周时间
   var timeArr = [] //取时间值
@@ -84,25 +96,25 @@ function render(resp, dateIndex) {
 
 
   // ---无比赛过滤器
-  var timeTArr=[];
-  var timeTDataArr=[];
-  var timeForHeaderT=[];
+  var timeTArr = [];
+  var timeTDataArr = [];
+  var timeForHeaderT = [];
   for (var i = 0; i < timeDataArr.length; i++) {
-    if (timeDataArr[i].list != false){
+    if (timeDataArr[i].list != false) {
       timeTArr.push(timeArr[i]);
-      timeForHeaderT.push(timeForHeader[i]); 
+      timeForHeaderT.push(timeForHeader[i]);
       timeTDataArr.push(timeDataArr[i]);
     }
   }
   // ---过滤器end
 
 
-   // console.log(timeArr)
+  // console.log(timeArr)
   var toDayData = timeTDataArr[dateIndex]; //当天数据 
   var headerDateTip = toDayData.lDate; //头部日期提示
-  
+
   //console.log(headerDateTip)
-  
+
   var toDayList = toDayData.list; //当天比赛数据
   // console.log(toDayList);
   var rowToDayList = []; //每行比赛数据
@@ -113,176 +125,176 @@ function render(resp, dateIndex) {
     obj.gamename = {};
     obj.onewinscore = {};
     obj.towwinscore = {};
-    obj.scheduleid = {}
-    
-      obj.title.text = toDayList[i].oneseedname + " : " + toDayList[i].twoseedname
-    obj.content.text = toDayList[i].ename + " " + toDayList[i].starttime
+    obj.scheduleid = {};
 
-    obj.onewinscore.text = toDayList[i].onewin // + "  [ " + toDayList[i].oneScore + " ]";
-    obj.towwinscore.text = toDayList[i].twowin //+ "  [ " + toDayList[i].twoScore + " ]";
-    obj.scheduleid.text = toDayList[i].scheduleid 
+    obj.title.text = toDayList[i].oneseedname + " : " + toDayList[i].twoseedname;
+    obj.content.text = toDayList[i].ename + " " + toDayList[i].starttime;
+
+    obj.onewinscore.text = toDayList[i].onewin;// + "  [ " + toDayList[i].oneScore + " ]";
+    obj.towwinscore.text = toDayList[i].twowin;//+ "  [ " + toDayList[i].twoScore + " ]";
+    obj.scheduleid.text = toDayList[i].scheduleid;
     rowToDayList.push(obj);
   }
 
   // console.log(rowToDayList);
   $ui.render({
     views: [{
-        type: "menu",
-        props: {
-          //items: timeTArr,
-          items: timeForHeaderT,
-          index: dateIndex
-        },
-        layout: function(make) {
-          make.left.top.right.equalTo(0)
-          make.height.equalTo(44)
-        },
-        events: {
-          changed: function(sender) {
-            var items = sender.items
-            var index = sender.index;
-            render(resp, index);
-            // $ui.toast(index + ": "  + items[index]);
-          }
-        }
-      }, {
-        type: "list",
-        props: {
-          grouped: true,
-          rowHeight: 68, // 行高
-          header: {
-            type: "label",
-            props: {
-              height: 20,
-              text: headerDateTip,
-              textColor: $color("#AAAAAA"),
-              align: $align.center,
-              font: $font(14)
-            }
-          },
-          footer: {
-            type: "label",
-            props: {
-              height: 20,
-              text: "-我是有底线的-",
-              textColor: $color("#AAAAAA"),
-              align: $align.center,
-              font: $font(12)
-            }
-          },
-          template: [{
-              type: "label",
-              props: {
-                id: "title", // 队伍
-                font: $font(20)
-              },
-              layout: function(make, view) {
-                make.centerX.equalTo(0)
-                make.top.offset(16)
-                // make.left.equalTo(160)
-                // make.top.right.inset(8)
-                make.height.equalTo(24)
-              }
-            },
-            {
-              type: "label",
-              props: {
-                id: "content",
-                textColor: $color("#888888"),
-                font: $font(15)
-              }, // 比赛时间 id content
-              layout: function(make, view) {
-                //make.left.right.equalTo(180);
-
-make.top.equalTo(48)
-
-make.centerX.equalTo(0) // 居中
-                make.bottom.equalTo(-2);
-              }
-            },
-            {
-              type: "label",
-              props: {
-                id: "onewinscore",
-                textColor: $color("#888888"),
-                font: $font(25)
-              }, // 左边比分
-              layout: function(make) {
-                //make.left.equalTo(40)
-                make.left.inset(48)
-                make.top.inset(10)
-                make.height.equalTo(40)
-              }
-            },
-            {
-              type: "label",
-              props: {
-                id: "towwinscore",
-                textColor: $color("#888888"),
-                font: $font(25)
-              }, // 右边比分
-              layout: function(make) {
-                //make.right.equalTo(40)
-                make.right.inset(48)
-                make.top.inset(10)
-                make.height.equalTo(40)
-              }
-            }
-          ],
-          data: [{
-            rows: rowToDayList
-          }]
-        },
-        layout: function(make, view) {
-          make.left.right.equalTo(0);
-          make.top.equalTo(45);
-          make.height.equalTo(view.super);
-          make.bottom.equalTo(100);
-        },
-        events: {
-          didSelect: function(tableView, indexPath) {
-            var row = indexPath.row;
-            var scheduleid = rowToDayList[row].scheduleid.text;
-            console.log(scheduleid)
-            $app.openBrowser({
-              type: 10000,
-              url: "http://www.wanplus.com/schedule/" + scheduleid + ".html"
-            })
-          }
-        }
+      type: "menu",
+      props: {
+        //items: timeTArr,
+        items: timeForHeaderT,
+        index: dateIndex
       },
-      {
-        type: "button",
-        props: {
-          title: prevdate
-        },
-        layout: function(make, view) {
-          make.left.equalTo(30);
-          make.bottom.equalTo(-20);
-          make.height.equalTo(40);
-        },
-        events: {
-          tapped: function(sender) {
-            $ui.toast("Tapped")
-          }
-        }
+      layout: function (make) {
+        make.left.top.right.equalTo(0)
+        make.height.equalTo(44)
       },
-      {
-        type: "button",
-        props: {
-          title: nextdate
-        },
-        layout: function(make, view) {
-          make.right.equalTo(-30);
-          make.bottom.equalTo(-20);
-          make.height.equalTo(40);
-        },
-        events: {
-          tapped: function(sender) {
-            $ui.toast("Tapped")
-          }
+      events: {
+        changed: function (sender) {
+          var items = sender.items
+          var index = sender.index;
+          render(resp, index);
+          // $ui.toast(index + ": "  + items[index]);
         }
       }
+    }, {
+      type: "list",
+      props: {
+        grouped: true,
+        rowHeight: 68, // 行高
+        header: {
+          type: "label",
+          props: {
+            height: 20,
+            text: headerDateTip,
+            textColor: $color("#AAAAAA"),
+            align: $align.center,
+            font: $font(14)
+          }
+        },
+        footer: {
+          type: "label",
+          props: {
+            height: 20,
+            text: "-我是有底线的-",
+            textColor: $color("#AAAAAA"),
+            align: $align.center,
+            font: $font(12)
+          }
+        },
+        template: [{
+          type: "label",
+          props: {
+            id: "title", // 队伍
+            font: $font(20)
+          },
+          layout: function (make, view) {
+            make.centerX.equalTo(0)
+            make.top.offset(16)
+            // make.left.equalTo(160)
+            // make.top.right.inset(8)
+            make.height.equalTo(24)
+          }
+        },
+        {
+          type: "label",
+          props: {
+            id: "content",
+            textColor: $color("#888888"),
+            font: $font(15)
+          }, // 比赛时间 id content
+          layout: function (make, view) {
+            //make.left.right.equalTo(180);
+
+            make.top.equalTo(48)
+
+            make.centerX.equalTo(0) // 居中
+            make.bottom.equalTo(-2);
+          }
+        },
+        {
+          type: "label",
+          props: {
+            id: "onewinscore",
+            textColor: $color("#888888"),
+            font: $font(25)
+          }, // 左边比分
+          layout: function (make) {
+            //make.left.equalTo(40)
+            make.left.inset(48)
+            make.top.inset(10)
+            make.height.equalTo(40)
+          }
+        },
+        {
+          type: "label",
+          props: {
+            id: "towwinscore",
+            textColor: $color("#888888"),
+            font: $font(25)
+          }, // 右边比分
+          layout: function (make) {
+            //make.right.equalTo(40)
+            make.right.inset(48)
+            make.top.inset(10)
+            make.height.equalTo(40)
+          }
+        }
+        ],
+        data: [{
+          rows: rowToDayList
+        }]
+      },
+      layout: function (make, view) {
+        make.left.right.equalTo(0);
+        make.top.equalTo(45);
+        make.height.equalTo(view.super);
+        make.bottom.equalTo(100);
+      },
+      events: {
+        didSelect: function (tableView, indexPath) {
+          var row = indexPath.row;
+          var scheduleid = rowToDayList[row].scheduleid.text;
+          console.log(scheduleid)
+          $app.openBrowser({
+            type: 10000,
+            url: "http://www.wanplus.com/schedule/" + scheduleid + ".html"
+          })
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        title: prevdate
+      },
+      layout: function (make, view) {
+        make.left.equalTo(30);
+        make.bottom.equalTo(-20);
+        make.height.equalTo(40);
+      },
+      events: {
+        tapped: function (sender) {
+          $ui.toast("Tapped")
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        title: nextdate
+      },
+      layout: function (make, view) {
+        make.right.equalTo(-30);
+        make.bottom.equalTo(-20);
+        make.height.equalTo(40);
+      },
+      events: {
+        tapped: function (sender) {
+          $ui.toast("Tapped")
+        }
+      }
+    }
     ]
   })
   if (toDayData.list == false) {
