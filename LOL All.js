@@ -1,7 +1,7 @@
 // 原作者：wlor0623，  https://github.com/wlor0623/jsbox/blob/master/lolscore.js
 // 由 QvQ修改： https://github.com/FrankHan/jsbox/blob/master/LOL%20All.js  
 
-$app.tips("点击即可查看比赛视频");
+$app.tips("点击比赛即可查看详情");
 var resp = []
 $http.post({
   url: "http://www.wanplus.com/ajax/schedule/list",
