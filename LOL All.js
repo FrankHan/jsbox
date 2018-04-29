@@ -80,6 +80,9 @@ $http.post({
   }
 })
 
+
+
+// Main program
 function render(resp, dateIndex) {
   var data = resp.data
 
@@ -132,7 +135,7 @@ function render(resp, dateIndex) {
     obj.scheduleid = {};
     obj.title.text = toDayList[i].oneseedname + " : " + toDayList[i].twoseedname;
     obj.content.text = toDayList[i].ename + " " + toDayList[i].starttime;
-    obj.onewinscore.text = toDayList[i].onewin.toString() ;
+    obj.onewinscore.text = toDayList[i].onewin.toString();
     obj.twowinscore.text = toDayList[i].twowin.toString();
     obj.scheduleid.text = toDayList[i].scheduleid;
     rowToDayList.push(obj);
@@ -177,8 +180,8 @@ function render(resp, dateIndex) {
         footer: {
           type: "label",
           props: {
-            height: 20,
-            text: "-我是有底线的-",
+            height: 100,//20,下部拉动距离，为了所有比赛不被遮挡
+            text: "",
             textColor: $color("#AAAAAA"),
             align: $align.center,
             font: $font(12)
@@ -211,7 +214,7 @@ function render(resp, dateIndex) {
             make.top.equalTo(48)
 
             make.centerX.equalTo(0) // 居中 
-            make.bottom.equalTo(-2);
+            make.bottom.equalTo(-2)
           }
         },
         {
