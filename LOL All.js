@@ -37,7 +37,7 @@ $http.post({
       }
     }
 
-    console.log(todayDateStore)
+    console.log("todayDateStore: "+todayDateStore)
 
     var timeArr = [] //取时间值
     var timeDataArr = []; //数据值
@@ -64,7 +64,7 @@ $http.post({
 
     for (var i = 0; i < timeTArr.length; i++) {
       if (timeTArr[i] >= todayDateStore) {
-        console.log(i); //定位到最近一天
+        console.log("定位到天index： "+i); //定位到最近一天
         render(resp, i);
         break;
       }
@@ -82,7 +82,7 @@ function render(resp, dateIndex) {
   //  console.log(data)
   var prevdate = data.data.prevdate; //上周时间
   var nextdate = data.data.nextdate; //下周时间
-  var timeArr = [] //取时间值
+  var timeArr = [] ;//取时间值
   var timeForHeader = [];// 显示在menu
   var timeDataArr = []; //数据值
   var rowsData = []; //列表信息
@@ -126,12 +126,10 @@ function render(resp, dateIndex) {
     obj.onewinscore = {};
     obj.towwinscore = {};
     obj.scheduleid = {};
-
     obj.title.text = toDayList[i].oneseedname + " : " + toDayList[i].twoseedname;
     obj.content.text = toDayList[i].ename + " " + toDayList[i].starttime;
-
-    obj.onewinscore.text = toDayList[i].onewin;// + "  [ " + toDayList[i].oneScore + " ]";
-    obj.towwinscore.text = toDayList[i].twowin;//+ "  [ " + toDayList[i].twoScore + " ]";
+    obj.onewinscore.text = toDayList[i].onewin.toString() ;
+    obj.towwinscore.text = toDayList[i].twowin.toString();
     obj.scheduleid.text = toDayList[i].scheduleid;
     rowToDayList.push(obj);
   }
@@ -208,7 +206,7 @@ function render(resp, dateIndex) {
 
             make.top.equalTo(48)
 
-            make.centerX.equalTo(0) // 居中
+            make.centerX.equalTo(0) // 居中 
             make.bottom.equalTo(-2);
           }
         },
