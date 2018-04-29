@@ -133,8 +133,17 @@ function render(resp, dateIndex) {
     obj.onewinscore = {};
     obj.twowinscore = {};
     obj.scheduleid = {};
+    obj.isOver = {} ;//是否正在进行中
+
+    
+    if (toDayList[i].isover == false){
+      obj.isOver.text = "进行中"
+      var isOverVar = "进行中"
+    } else {
+      var isOverVar = ""
+    }
     obj.title.text = toDayList[i].oneseedname + " : " + toDayList[i].twoseedname;
-    obj.content.text = toDayList[i].ename + " " + toDayList[i].starttime;
+    obj.content.text = toDayList[i].ename + " " + toDayList[i].starttime //+ " " + isOverVar;
     obj.onewinscore.text = toDayList[i].onewin.toString();
     obj.twowinscore.text = toDayList[i].twowin.toString();
     obj.scheduleid.text = toDayList[i].scheduleid;
@@ -166,7 +175,7 @@ function render(resp, dateIndex) {
       type: "list",
       props: {
         grouped: true,
-        rowHeight: 68, // 行高
+        rowHeight: 70, // 行高
         header: {
           type: "label",
           props: {
@@ -187,7 +196,22 @@ function render(resp, dateIndex) {
             font: $font(12)
           }
         },
-        template: [{
+        template: [
+          {
+          type: "label",
+          props: {
+            id: "isOver", // 进行中
+            font: $font(10), 
+            textColor: $color("#888888")     
+          },
+          layout: function (make, view) {
+            make.centerX.equalTo(0)
+            make.top.equalTo(2)
+            // make.left.equalTo(160)
+            // make.top.right.inset(8)
+            make.height.equalTo(20)
+          }
+        },{
           type: "label",
           props: {
             id: "title", // 队伍
@@ -195,7 +219,7 @@ function render(resp, dateIndex) {
           },
           layout: function (make, view) {
             make.centerX.equalTo(0)
-            make.top.offset(16)
+            make.top.equalTo(18)
             // make.left.equalTo(160)
             // make.top.right.inset(8)
             make.height.equalTo(24)
