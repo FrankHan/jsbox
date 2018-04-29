@@ -1,6 +1,7 @@
-// 原作者：wlor0623，  https://github.com/wlor0623/jsbox/edit/master/lolscore.js
+// 原作者：wlor0623，  https://github.com/wlor0623/jsbox/blob/master/lolscore.js
 // 由 QvQ修改： https://github.com/FrankHan/jsbox/blob/master/LOL%20All.js  
 
+$app.tips("点击即可查看比赛视频");
 var resp = []
 $http.post({
   url: "http://www.wanplus.com/ajax/schedule/list",
@@ -25,9 +26,12 @@ $http.post({
   },
   handler: function (resp) {
     resp = resp;
+
+
+    // ---定位到今天并render
     var data = resp.data
 
-    console.log(data)
+    //console.log(data)
 
     var scheduleList = data.data.scheduleList;
     for (var k in scheduleList) {
@@ -37,14 +41,16 @@ $http.post({
       }
     }
 
-    console.log("todayDateStore: "+todayDateStore)
+    //console.log("todayDateStore: "+todayDateStore)
 
     var timeArr = [] //取时间值
     var timeDataArr = []; //数据值
+    //var timeForHeader = [];// 显示在menu
 
     for (var key in scheduleList) {
       timeArr.push(key);
       timeDataArr.push(scheduleList[key]);
+      //timeForHeader.push(scheduleList[key].week);  // lDate,date,week,filterdate
     }
 
     // ---无比赛过滤器
@@ -54,25 +60,23 @@ $http.post({
     for (var i = 0; i < timeDataArr.length; i++) {
       if (timeDataArr[i].list != false) {
         timeTArr.push(timeArr[i]);
-        // timeForHeaderT.push(timeForHeader[i]);
-        // timeTDataArr.push(timeDataArr[i]);
+        //timeForHeaderT.push(timeForHeader[i]);
+        //timeTDataArr.push(timeDataArr[i]);
       }
     }
     // ---过滤器end
 
-    console.log(timeTArr)
+    //console.log(timeTArr)
 
     for (var i = 0; i < timeTArr.length; i++) {
       if (timeTArr[i] >= todayDateStore) {
-        console.log("定位到天index： "+i); //定位到最近一天
+        //console.log("定位到天index： "+i); //定位到最近一天
         render(resp, i);
         break;
       }
     }
+    // ---定位到今天并render  end
 
-
-
-    //render(resp, 0);
   }
 })
 
@@ -124,12 +128,12 @@ function render(resp, dateIndex) {
     obj.content = {};
     obj.gamename = {};
     obj.onewinscore = {};
-    obj.towwinscore = {};
+    obj.twowinscore = {};
     obj.scheduleid = {};
     obj.title.text = toDayList[i].oneseedname + " : " + toDayList[i].twoseedname;
     obj.content.text = toDayList[i].ename + " " + toDayList[i].starttime;
     obj.onewinscore.text = toDayList[i].onewin.toString() ;
-    obj.towwinscore.text = toDayList[i].twowin.toString();
+    obj.twowinscore.text = toDayList[i].twowin.toString();
     obj.scheduleid.text = toDayList[i].scheduleid;
     rowToDayList.push(obj);
   }
@@ -227,7 +231,7 @@ function render(resp, dateIndex) {
         {
           type: "label",
           props: {
-            id: "towwinscore",
+            id: "twowinscore",
             textColor: $color("#888888"),
             font: $font(25)
           }, // 右边比分
