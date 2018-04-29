@@ -1,5 +1,5 @@
 // 原作者：wlor0623，  https://github.com/wlor0623/jsbox/blob/master/lolscore.js
-// 由 QvQ修改： https://github.com/FrankHan/jsbox/blob/master/LOL%20All.js  
+// 由 QvQ修改：https://github.com/FrankHan/jsbox/blob/master/eSports%20All.js
 
 $app.tips("点击比赛即可查看详情");
 
