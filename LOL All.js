@@ -134,8 +134,11 @@ function render(resp, dateIndex) {
     obj.twowinscore = {};
     obj.scheduleid = {};
     obj.isOver = {} ;//是否正在进行中
+    obj.oneicon = {}; //一队图标
+    obj.twoicon = {}; //二队图标
 
-    
+    obj.oneicon.src = toDayList[i].oneicon;
+    obj.twoicon.src = toDayList[i].twoicon;   
     if (toDayList[i].isover == false){
       obj.isOver.text = "进行中"
       var isOverVar = "进行中"
@@ -244,27 +247,54 @@ function render(resp, dateIndex) {
         {
           type: "label",
           props: {
-            id: "onewinscore",
+            id: "onewinscore",// 一队比分
             textColor: $color("#888888"),
             font: $font(25)
-          }, // 左边比分
+          }, 
           layout: function (make) {
-            //make.left.equalTo(40)
-            make.left.inset(48)
+            // make.left.inset(28)
+            make.right.equalTo($("title").centerX).offset(-110) //距离队伍的偏移量
             make.top.inset(10)
             make.height.equalTo(40)
           }
         },
+        // {
+        //   type: "image",
+        //   props: {
+        //     id: "oneicon", //一队图标
+        //     radius:20
+        //   },
+        //   layout: function (make, view) {
+        //     // make.left.inset(60);
+        //     make.right.equalTo($("title").left).offset(-20) //距离队伍的偏移量
+        //     // make.left.equalTo(view.centerX).offset(30) //距离center的偏移量
+        //     make.top.equalTo(10);
+        //     make.size.equalTo(40)
+        //   }
+        // },
+        // {
+        //   type: "image",
+        //   props: {
+        //     id: "twoicon", //二队图标
+        //     radius: 20
+        //   },
+        //   layout: function (make, view) {
+        //     make.right.inset(60);
+        //     make.top.equalTo(10);
+        //     make.size.equalTo(40)
+        //   }
+        // },
         {
           type: "label",
           props: {
-            id: "twowinscore",
+            id: "twowinscore",// 二队比分
             textColor: $color("#888888"),
             font: $font(25)
-          }, // 右边比分
+          }, 
           layout: function (make) {
             //make.right.equalTo(40)
-            make.right.inset(48)
+            // make.right.inset(28)
+            make.left.equalTo($("title").centerX).offset(110) //距离队伍的偏移量
             make.top.inset(10)
             make.height.equalTo(40)
           }
