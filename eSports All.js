@@ -1,11 +1,11 @@
 /**
- * @Version 1.2
+ * @Version 1.3
  * @author QvQ
  * @date 2018.4.30
  * @brief 
  *   1. 加入了自动更新功能
  *   2. 修复了一些问题
- *   3. 其他若干优化
+ *   3. 加入了csgo比赛结果
  * @/brief
  */
 
@@ -17,7 +17,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 1.2
+let appVersion = 1.3
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 if (needCheckup()) {
@@ -523,7 +523,7 @@ function render(resp, dateIndex) {
           $pick.data({
             props: {
               items: [
-                ["所有比赛", "LOL", "Dota2", "OWL", "KPL", "使命召唤OL"]   //0:All ,1:Dota2 , 2:lol, 4: csgo(fail), 5: OWL, 6:KPL, 8: 使命召唤OL冠军联赛
+                ["所有比赛", "LOL", "Dota2", "守望先锋", "csgo", "KPL", "使命召唤OL"]   //0:All ,1:Dota2 , 2:lol, 4: csgo, 5: OWL, 6:KPL, 8: 使命召唤OL冠军联赛
               ]
             },
             handler: function (data) {
@@ -539,8 +539,11 @@ function render(resp, dateIndex) {
                 case "Dota2":
                   getGameDataRender(1)
                   break;
-                case "OWL":
+                case "守望先锋":
                   getGameDataRender(5)
+                  break;
+                case "csgo":
+                  getGameDataRender(4)
                   break;
                 case "KPL":
                   getGameDataRender(6)
