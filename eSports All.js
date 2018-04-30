@@ -1,11 +1,10 @@
 /**
- * @Version 1.3
+ * @Version 1.4
  * @author QvQ
  * @date 2018.4.30
  * @brief 
- *   1. 加入了自动更新功能
- *   2. 修复了一些问题
- *   3. 加入了csgo比赛结果
+ *   1. 加入了csgo比赛结果
+ *   2. 使用webview代替了浏览器跳转
  * @/brief
  */
 
@@ -17,7 +16,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 1.3
+let appVersion = 1.4
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 if (needCheckup()) {
@@ -499,10 +498,20 @@ function render(resp, dateIndex) {
           var row = indexPath.row;
           var scheduleid = rowToDayList[row].scheduleid.text;
           console.log(scheduleid)
-          $app.openBrowser({
-            type: 10000,
-            url: "http://www.wanplus.com/schedule/" + scheduleid + ".html"
+
+          $ui.push({
+            props: {
+              title: rowToDayList[row].title.text
+            },
+            views: [{
+              type: "web",
+              props: {
+                url: "http://www.wanplus.com/schedule/" + scheduleid + ".html"
+              },
+              layout: $layout.fill,
+            }]
           })
+
         }
       }
     },
