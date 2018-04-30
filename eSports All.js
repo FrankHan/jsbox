@@ -1,5 +1,5 @@
 /**
- * @Version 1.1
+ * @Version 1.2
  * @author QvQ
  * @date 2018.4.30
  * @brief 
@@ -17,7 +17,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 1.1
+let appVersion = 1.2
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 if (needCheckup()) {
