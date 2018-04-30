@@ -1,10 +1,146 @@
+/**
+ * @Version 1.1
+ * @author QvQ
+ * @date 2018.4.30
+ * @brief 
+ *   1. 加入了自动更新功能
+ *   2. 修复了一些问题
+ *   3. 其他若干优化
+ * @/brief
+ */
+
 // 原作者：wlor0623，  https://github.com/wlor0623/jsbox/blob/master/lolscore.js
 // 由 QvQ修改： https://github.com/FrankHan/jsbox/blob/master/eSports%20All.js
 
-$app.tips("点击比赛即可查看详情");
+// $app.tips("点击比赛即可查看详情");
 
-// 初始时获取全部比赛
-getGameDataRender(0)
+// ----版本自动更新
+let appVersion = 1.1
+let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
+
+if (needCheckup()) {
+  checkupVersion()
+} else {
+  // 初始时获取全部比赛
+  getGameDataRender(0)
+}
+
+//需要检查更新？
+function needCheckup() {
+  let nDate = new Date()
+  let lastCT = $cache.get("lastCT")
+  if (lastCT == undefined) {
+    $cache.set("lastCT", nDate)
+    return true
+  } else {
+    let tdoa = (nDate.getTime() - lastCT.getTime()) / (60 * 1000)
+    let interval = 1440
+    if ($app.env == $env.app) {
+      interval = 15
+    }
+    myLog("离下次检测更新: " + (interval - tdoa) + "  分钟")
+    if (tdoa > interval) {
+      $cache.set("lastCT", nDate)
+      return true
+    } else {
+      return false
+    }
+  }
+}
+
+//需要更新？
+function needUpdate(nv, lv) {
+  let m = parseFloat(nv) - parseFloat(lv)
+  if (m < 0) {
+    return true
+  } else {
+    return false
+  }
+}
+
+//升级插件
+function updateAddin() {
+  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())
+  $app.openURL(url2i)
+}
+
+//检查版本
+function checkupVersion() {
+  $ui.loading("检查更新")
+  $http.download({
+    url: addinURL,
+    showsProgress: false,
+    timeout: 5,
+    handler: function (resp) {
+      $console.info(resp)
+      let str = resp.data.string
+      $console.info(str)
+      let lv = getVFS(str)
+      $ui.loading(false)
+      if (needUpdate(appVersion, lv)) {
+        sureToUpdate(str)
+      } else {
+        // 初始时获取全部比赛
+        getGameDataRender(0)
+      }
+    }
+  })
+}
+
+//获取版本号
+function getVFS(str) {
+  let vIndex = str.indexOf("@Version ")
+  let start = vIndex + 9
+  let end = start + 3
+  let lv = str.substring(start, end)
+  return lv
+}
+
+//获取更新说明
+function getUpDes(str) {
+  let bIndex = str.indexOf("@brief")
+  let eIndex = str.indexOf("@/brief")
+  let des = str.substring(bIndex + 6, eIndex)
+  let fixDes = des.replace(/\*/g, "")
+  myLog(fixDes)
+  return fixDes
+}
+
+//当前插件名
+function currentName() {
+  let name = $addin.current.name
+  let end = name.length - 3
+  return name.substring(0, end)
+}
+
+//当前插件图标
+function currentIcon() {
+  return $addin.current.icon
+}
+
+//确定升级？
+function sureToUpdate(str) {
+  let des = getUpDes(str)
+  $ui.alert({
+    title: "发现新版本",
+    message: des + "\n是否更新？",
+    actions: [{
+      title: "是",
+      handler: function () {
+        updateAddin()
+      }
+    },
+    {
+      title: "否",
+      handler: function () {
+
+      }
+    }
+    ]
+  })
+}
+
+
 
 // Main program
 function getGameDataRender(gameIndex) {
@@ -165,7 +301,6 @@ function render(resp, dateIndex) {
         var currentCompeStartHour = currentCompeStarttime.split(":")[0];
         var currentCompeStartMinute = currentCompeStarttime.split(":")[1];
         console.log(currentCompeStartHour + " " + currentCompeStartMinute)
-
         if (realtimeHour >= currentCompeStartHour && realtimeMinute >= currentCompeStartMinute) { //当天进行中的
           obj.isOver.text = "进行中"
           var isOverVar = "进行中"
@@ -175,8 +310,6 @@ function render(resp, dateIndex) {
           obj.onewinscore.text = "";
           obj.twowinscore.text = "";
         }
-
-
       } else {
         obj.isOver.text = "未开始"//后面天
         var isOverVar = "未开始"
