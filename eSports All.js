@@ -1,5 +1,5 @@
 /**
- * @Version 1.2
+ * @Version 1.1
  * @author QvQ
  * @date 2018.4.30
  * @brief 
@@ -14,8 +14,10 @@
 
 // $app.tips("点击比赛即可查看详情");
 
+"use strict"
+
 // ----版本自动更新
-let appVersion = 1.2
+let appVersion = 1.1
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 if (needCheckup()) {
@@ -60,7 +62,7 @@ function needUpdate(nv, lv) {
 
 //升级插件
 function updateAddin() {
-  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())
+  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())  //这里可以改icon，是否只在主程序运行等
   $app.openURL(url2i)
 }
 
@@ -104,6 +106,13 @@ function getUpDes(str) {
   let fixDes = des.replace(/\*/g, "")
   myLog(fixDes)
   return fixDes
+}
+
+//myLog
+function myLog(text) {
+  if ($app.env == $env.app) {
+    $console.log(text)
+  }
 }
 
 //当前插件名
@@ -264,10 +273,10 @@ function render(resp, dateIndex) {
   var headerDateTip = toDayData.lDate; //头部日期提示
 
   var selectedDayTimeStamp = toDayData.time; //当天的时间戳，为当天00:00
-  console.log(selectedDayTimeStamp)
+  //console.log(selectedDayTimeStamp)
   var realtime = new Date()
   var realtimeStamp = realtime.getTime();//realtime
-  console.log(realtimeStamp / 1000)
+  //console.log(realtimeStamp / 1000)
   var realtimeHour = realtime.getHours();//获取当前时间小时数值0~23 
   var realtimeMinute = realtime.getMinutes()
 
@@ -300,7 +309,7 @@ function render(resp, dateIndex) {
         var currentCompeStarttime = toDayList[i].starttime
         var currentCompeStartHour = currentCompeStarttime.split(":")[0];
         var currentCompeStartMinute = currentCompeStarttime.split(":")[1];
-        console.log(currentCompeStartHour + " " + currentCompeStartMinute)
+        //console.log(currentCompeStartHour + " " + currentCompeStartMinute)
         if (realtimeHour >= currentCompeStartHour && realtimeMinute >= currentCompeStartMinute) { //当天进行中的
           obj.isOver.text = "进行中"
           var isOverVar = "进行中"
