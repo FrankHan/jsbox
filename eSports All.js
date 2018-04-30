@@ -1,5 +1,5 @@
 // 原作者：wlor0623，  https://github.com/wlor0623/jsbox/blob/master/lolscore.js
-// 由 QvQ修改：https://github.com/FrankHan/jsbox/blob/master/eSports%20All.js
+// 由 QvQ修改： https://github.com/FrankHan/jsbox/blob/master/eSports%20All.js
 
 $app.tips("点击比赛即可查看详情");
 
@@ -127,6 +127,14 @@ function render(resp, dateIndex) {
   var toDayData = timeTDataArr[dateIndex]; //当天数据 
   var headerDateTip = toDayData.lDate; //头部日期提示
 
+  var selectedDayTimeStamp = toDayData.time; //当天的时间戳，为当天00:00
+  console.log(selectedDayTimeStamp)
+  var realtime = new Date()
+  var realtimeStamp = realtime.getTime();//realtime
+  console.log(realtimeStamp / 1000)
+  var realtimeHour = realtime.getHours();//获取当前时间小时数值0~23 
+  var realtimeMinute = realtime.getMinutes()
+
   //console.log(headerDateTip)
 
   var toDayList = toDayData.list; //当天比赛数据
@@ -146,16 +154,41 @@ function render(resp, dateIndex) {
 
     obj.oneicon.src = toDayList[i].oneicon;
     obj.twoicon.src = toDayList[i].twoicon;
+    obj.onewinscore.text = toDayList[i].onewin.toString();
+    obj.twowinscore.text = toDayList[i].twowin.toString();
+
     if (toDayList[i].isover == false) {
-      obj.isOver.text = "进行中"
-      var isOverVar = "进行中"
+      if (realtimeStamp / 1000 >= selectedDayTimeStamp) {//选中了今天
+
+        // 获取当前比赛的时间
+        var currentCompeStarttime = toDayList[i].starttime
+        var currentCompeStartHour = currentCompeStarttime.split(":")[0];
+        var currentCompeStartMinute = currentCompeStarttime.split(":")[1];
+        console.log(currentCompeStartHour + " " + currentCompeStartMinute)
+
+        if (realtimeHour >= currentCompeStartHour && realtimeMinute >= currentCompeStartMinute) { //当天进行中的
+          obj.isOver.text = "进行中"
+          var isOverVar = "进行中"
+        } else {// 当天还没开始
+          obj.isOver.text = "未开始"
+          var isOverVar = "未开始"
+          obj.onewinscore.text = "";
+          obj.twowinscore.text = "";
+        }
+
+
+      } else {
+        obj.isOver.text = "未开始"//后面天
+        var isOverVar = "未开始"
+        obj.onewinscore.text = "";
+        obj.twowinscore.text = "";
+      }
     } else {
-      var isOverVar = ""
+      var isOverVar = "已结束"//已结束的比赛
+      obj.isOver.text = "已结束"
     }
     obj.title.text = toDayList[i].oneseedname + " : " + toDayList[i].twoseedname;
     obj.content.text = toDayList[i].ename + " " + toDayList[i].starttime //+ " " + isOverVar;
-    obj.onewinscore.text = toDayList[i].onewin.toString();
-    obj.twowinscore.text = toDayList[i].twowin.toString();
     obj.scheduleid.text = toDayList[i].scheduleid;
     rowToDayList.push(obj);
   }
@@ -226,7 +259,7 @@ function render(resp, dateIndex) {
             props: {
               id: "title", // 队伍
               font: $font(20),
-              autoFontSize:true //字体动态调整
+              autoFontSize: true //字体动态调整
             },
             layout: function (make, view) {
               make.centerX.equalTo(0)
@@ -234,7 +267,7 @@ function render(resp, dateIndex) {
               // make.left.equalTo(160)
               // make.top.right.inset(8)
               make.height.equalTo(24),
-              make.width.lessThanOrEqualTo(200) //字体动态调整
+                make.width.lessThanOrEqualTo(200) //字体动态调整
             }
           },
           {
