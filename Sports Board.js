@@ -74,12 +74,27 @@ function render(resp) {
 
 
   // console.log(timeArr)
-  
+
   //var headerDateTip = gameDataArr.lDate; //头部日期提示
 
   //console.log(headerDateTip)
 
-  var rowToDayList = []; //每行比赛数据
+
+  // ----！！！ 给rowToDayList赋值
+  var rowToDayList = []; //每行比赛数据,用于最终传给list显示！
+
+  // 二维数组初始化  ！！！！好像不行，因为每个天数下的比赛数目不一样。应该：先渲染第一天的数据，后面用list的insert方法插入？？
+
+
+  // var rowToDayList = new Array();  //先声明一维 
+  // for (var k = 0; k < i; k++) {    //一维长度为i,i为变量，可以根据实际情况改变  
+  //   rowToDayList[k] = new Array();  //声明二维，每一个一维数组里面的一个元素都是一个数组；  
+  //   for (var j = 0; j < p; j++) {   //一维数组里面每个元素数组可以包含的数量p，p也是一个变量；   
+  //     rowToDayList[k][j] = "";    //这里将变量初始化，我这边统一初始化为空，后面在用所需的值覆盖里面的值 
+  //   }
+  // }
+
+
 
 
   for (var kk = 0; kk < gameDataArr.length; kk++) {//games[0],games[1]就是不同天
@@ -87,6 +102,9 @@ function render(resp) {
     var toDayList = gameDataArr[kk].data; //当天比赛数据
 
     // console.log(toDayList);
+
+
+
 
     for (var i = 0; i < toDayList.length; i++) {// 当天的第0,1,2场比赛
 
@@ -104,8 +122,8 @@ function render(resp) {
       obj.twoicon = {}; //二队图标
 
       obj.title.text = toDayList[i].home_name + " : " + toDayList[i].away_name;
-
-
+      obj.onewinscore.text = toDayList[i].home_score.toString();
+      obj.twowinscore.text = toDayList[i].away_score.toString();
 
       rowToDayList.push(obj);
     }
@@ -180,36 +198,36 @@ function render(resp) {
           //     make.bottom.equalTo(-2)
           //   }
           // },
-          // {
-          //   type: "label",
-          //   props: {
-          //     id: "onewinscore",// 一队比分
-          //     textColor: $color("#888888"),
-          //     font: $font(25)
-          //   },
-          //   layout: function (make) {
-          //     // make.left.inset(28)
-          //     make.right.equalTo($("title").centerX).offset(-110) //距离队伍的偏移量
-          //     make.top.inset(10)
-          //     make.height.equalTo(40)
-          //   }
-          // },
+          {
+            type: "label",
+            props: {
+              id: "onewinscore",// 一队比分
+              textColor: $color("#888888"),
+              font: $font(25)
+            },
+            layout: function (make) {
+              // make.left.inset(28)
+              make.right.equalTo($("title").centerX).offset(-110) //距离队伍的偏移量
+              make.top.inset(10)
+              make.height.equalTo(40)
+            }
+          },
 
-          // {
-          //   type: "label",
-          //   props: {
-          //     id: "twowinscore",// 二队比分
-          //     textColor: $color("#888888"),
-          //     font: $font(25)
-          //   },
-          //   layout: function (make) {
-          //     //make.right.equalTo(40)
-          //     // make.right.inset(28)
-          //     make.left.equalTo($("title").centerX).offset(110) //距离队伍的偏移量
-          //     make.top.inset(10)
-          //     make.height.equalTo(40)
-          //   }
-          // }
+          {
+            type: "label",
+            props: {
+              id: "twowinscore",// 二队比分
+              textColor: $color("#888888"),
+              font: $font(25)
+            },
+            layout: function (make) {
+              //make.right.equalTo(40)
+              // make.right.inset(28)
+              make.left.equalTo($("title").centerX).offset(110) //距离队伍的偏移量
+              make.top.inset(10)
+              make.height.equalTo(40)
+            }
+          }
         ],
         data: [{
           rows: rowToDayList
