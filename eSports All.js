@@ -1,10 +1,11 @@
 /**
- * @Version 1.5
+ * @Version 1.7
  * @author QvQ
  * @date 2018.5.1
  * @brief 
  *   1. 本周没有比赛时会提醒
  *   2. 使用webview代替了浏览器跳转
+ *   3. 更新了icon
  * @/brief
  */
 
@@ -16,7 +17,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 1.5
+let appVersion = 1.7
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 if (needCheckup()) {
@@ -62,7 +63,7 @@ function needUpdate(nv, lv) {
 //升级插件
 function updateAddin() {
   //let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())  //这里可以改icon，是否只在主程序运行等
-  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=icon_039.png&types=1" )  //这里可以改icon，是否只在主程序运行等
+  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=eSports%20All&icon=icon_039.png&types=1" )  //这里可以改icon，是否只在主程序运行等
   $app.openURL(url2i)
 }
 
