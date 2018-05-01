@@ -1,9 +1,9 @@
 /**
- * @Version 1.4
+ * @Version 1.5
  * @author QvQ
- * @date 2018.4.30
+ * @date 2018.5.1
  * @brief 
- *   1. 加入了csgo比赛结果
+ *   1. 本周没有比赛时会提醒
  *   2. 使用webview代替了浏览器跳转
  * @/brief
  */
@@ -16,7 +16,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 1.4
+let appVersion = 1.5
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 if (needCheckup()) {
@@ -61,7 +61,8 @@ function needUpdate(nv, lv) {
 
 //升级插件
 function updateAddin() {
-  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())  //这里可以改icon，是否只在主程序运行等
+  //let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())  //这里可以改icon，是否只在主程序运行等
+  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=icon_039.png&types=1" )  //这里可以改icon，是否只在主程序运行等
   $app.openURL(url2i)
 }
 
@@ -172,7 +173,7 @@ function getGameDataRender(gameIndex) {
     },
     body: {
       _gtk: 184373722,
-      game: gameIndex,// 0:All ,1:Dota2 , 2:lol, 4: csgo(fail), 5: OWL, 6:KPL, 8: 使命召唤OL冠军联赛
+      game: gameIndex,// 0:All ,1:Dota2 , 2:lol, 4: csgo, 5: OWL, 6:KPL, 8: 使命召唤OL冠军联赛
       eids: ""
     },
     handler: function (resp) {
@@ -183,6 +184,11 @@ function getGameDataRender(gameIndex) {
       var data = resp.data
 
       //console.log(data)
+
+      if (data.data.isShowList == 0) {
+        $ui.toast("本周无该比赛")
+      }
+      
 
       var scheduleList = data.data.scheduleList;
       for (var k in scheduleList) {
