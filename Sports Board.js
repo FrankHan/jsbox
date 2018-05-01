@@ -4,6 +4,9 @@
 
 // menu 是天，对应于games[0], gamesp[1]，不行：太多天了。必须使用list加section的方法
 
+let appVersion = 1.2
+
+
 // $app.tips("点击比赛即可查看详情");
 var resp = []
 $http.get({
@@ -17,7 +20,7 @@ $http.get({
     "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_3 like Mac OS X) AppleWebKit/603.3.8 (KHTML, like Gecko) Mobile/14G60 isp/460.02 network/WIFI prokanqiu/7.1.18.55 iPhone8,4"
   },
   handler: function (resp) {
-    resp = resp;
+    // resp = resp;
 
 
     // ---定位到今天并render
@@ -64,172 +67,176 @@ function render(resp) {
   }
 
 
-  $ui.alert(gameDataArr)
+  // $ui.alert(gameDataArr)
 
 
 
 
 
   // console.log(timeArr)
-  var toDayData = gameDataArr; //当天数据 
-  //var headerDateTip = toDayData.lDate; //头部日期提示
+  
+  //var headerDateTip = gameDataArr.lDate; //头部日期提示
 
   //console.log(headerDateTip)
 
-  var toDayList = toDayData[0].data; //当天比赛数据
-
-  
-
-
-  // console.log(toDayList);
   var rowToDayList = []; //每行比赛数据
 
-  
-  for (var i = 0; i < toDayList.length; i++) {
 
-    
+  for (var kk = 0; kk < gameDataArr.length; kk++) {//games[0],games[1]就是不同天
 
-    var obj = {};
-    obj.title = {};
-    obj.content = {};
-    obj.gamename = {};
-    obj.onewinscore = {};
-    obj.twowinscore = {};
-    obj.scheduleid = {};
-    obj.isOver = {};//是否正在进行中
-    obj.oneicon = {}; //一队图标
-    obj.twoicon = {}; //二队图标
+    var toDayList = gameDataArr[kk].data; //当天比赛数据
 
-    obj.title.text = toDayList[i].home_name + " : " + toDayList[i].away_name;
+    // console.log(toDayList);
 
-    
+    for (var i = 0; i < toDayList.length; i++) {// 当天的第0,1,2场比赛
 
-    rowToDayList.push(obj);
+
+
+      var obj = {};
+      obj.title = {};
+      obj.content = {};
+      obj.gamename = {};
+      obj.onewinscore = {};
+      obj.twowinscore = {};
+      obj.scheduleid = {};
+      obj.isOver = {};//是否正在进行中
+      obj.oneicon = {}; //一队图标
+      obj.twoicon = {}; //二队图标
+
+      obj.title.text = toDayList[i].home_name + " : " + toDayList[i].away_name;
+
+
+
+      rowToDayList.push(obj);
+    }
+
   }
+
+
 
   // $ui.alert(rowToDayList)
 
   // console.log(rowToDayList);
   $ui.render({
-    
-        views: [{
-          type: "list",
+
+    views: [{
+      type: "list",
+      props: {
+        grouped: true,
+        rowHeight: 70, // 行高
+        header: {
+          type: "label",
           props: {
-            grouped: true,
-            rowHeight: 70, // 行高
-            header: {
-              type: "label",
-              props: {
-                height: 20,
-                text: "test it",// headerDateTip,
-                textColor: $color("#AAAAAA"),
-                align: $align.center,
-                font: $font(14)
-              }
-            },
-
-            template: [
-              {
-                type: "label",
-                props: {
-                  id: "isOver", // 进行中
-                  font: $font(10),
-                  textColor: $color("#888888")
-                },
-                layout: function (make, view) {
-                  make.centerX.equalTo(0)
-                  make.top.equalTo(2)
-                  // make.left.equalTo(160)
-                  // make.top.right.inset(8)
-                  make.height.equalTo(20)
-                }
-              }, {
-                type: "label",
-                props: {
-                  id: "title", // 队伍
-                  font: $font(20)
-                },
-                layout: function (make, view) {
-                  make.centerX.equalTo(0)
-                  make.top.equalTo(18)
-                  // make.left.equalTo(160)
-                  // make.top.right.inset(8)
-                  make.height.equalTo(24)
-                }
-              },
-              // {
-              //   type: "label",
-              //   props: {
-              //     id: "content",
-              //     textColor: $color("#888888"),
-              //     font: $font(15)
-              //   }, // 比赛时间 id content
-              //   layout: function (make, view) {
-              //     //make.left.right.equalTo(180);
-
-              //     make.top.equalTo(48)
-
-              //     make.centerX.equalTo(0) // 居中 
-              //     make.bottom.equalTo(-2)
-              //   }
-              // },
-              // {
-              //   type: "label",
-              //   props: {
-              //     id: "onewinscore",// 一队比分
-              //     textColor: $color("#888888"),
-              //     font: $font(25)
-              //   },
-              //   layout: function (make) {
-              //     // make.left.inset(28)
-              //     make.right.equalTo($("title").centerX).offset(-110) //距离队伍的偏移量
-              //     make.top.inset(10)
-              //     make.height.equalTo(40)
-              //   }
-              // },
-
-              // {
-              //   type: "label",
-              //   props: {
-              //     id: "twowinscore",// 二队比分
-              //     textColor: $color("#888888"),
-              //     font: $font(25)
-              //   },
-              //   layout: function (make) {
-              //     //make.right.equalTo(40)
-              //     // make.right.inset(28)
-              //     make.left.equalTo($("title").centerX).offset(110) //距离队伍的偏移量
-              //     make.top.inset(10)
-              //     make.height.equalTo(40)
-              //   }
-              // }
-            ],
-            data: [{
-              rows: rowToDayList
-            }]
-          },
-          layout: function (make, view) {
-            make.left.right.equalTo(0);
-            make.top.equalTo(45);
-            make.height.equalTo(view.super);
-            make.bottom.equalTo(100);
-          },
-          events: {
-            didSelect: function (tableView, indexPath) {
-              var row = indexPath.row;
-              //var scheduleid = rowToDayList[row].scheduleid.text;
-              //console.log(scheduleid)
-              // $app.openBrowser({
-              //   type: 10000,
-              //   url: "http://www.wanplus.com/schedule/" + scheduleid + ".html"
-              // })
-            }
+            height: 20,
+            text: "test it",// headerDateTip,
+            textColor: $color("#AAAAAA"),
+            align: $align.center,
+            font: $font(14)
           }
-        }
+        },
 
-        ]
-      })
-  if (toDayData.list == false) {
+        template: [
+          {
+            type: "label",
+            props: {
+              id: "isOver", // 进行中
+              font: $font(10),
+              textColor: $color("#888888")
+            },
+            layout: function (make, view) {
+              make.centerX.equalTo(0)
+              make.top.equalTo(2)
+              // make.left.equalTo(160)
+              // make.top.right.inset(8)
+              make.height.equalTo(20)
+            }
+          }, {
+            type: "label",
+            props: {
+              id: "title", // 队伍
+              font: $font(20)
+            },
+            layout: function (make, view) {
+              make.centerX.equalTo(0)
+              make.top.equalTo(18)
+              // make.left.equalTo(160)
+              // make.top.right.inset(8)
+              make.height.equalTo(24)
+            }
+          },
+          // {
+          //   type: "label",
+          //   props: {
+          //     id: "content",
+          //     textColor: $color("#888888"),
+          //     font: $font(15)
+          //   }, // 比赛时间 id content
+          //   layout: function (make, view) {
+          //     //make.left.right.equalTo(180);
+
+          //     make.top.equalTo(48)
+
+          //     make.centerX.equalTo(0) // 居中 
+          //     make.bottom.equalTo(-2)
+          //   }
+          // },
+          // {
+          //   type: "label",
+          //   props: {
+          //     id: "onewinscore",// 一队比分
+          //     textColor: $color("#888888"),
+          //     font: $font(25)
+          //   },
+          //   layout: function (make) {
+          //     // make.left.inset(28)
+          //     make.right.equalTo($("title").centerX).offset(-110) //距离队伍的偏移量
+          //     make.top.inset(10)
+          //     make.height.equalTo(40)
+          //   }
+          // },
+
+          // {
+          //   type: "label",
+          //   props: {
+          //     id: "twowinscore",// 二队比分
+          //     textColor: $color("#888888"),
+          //     font: $font(25)
+          //   },
+          //   layout: function (make) {
+          //     //make.right.equalTo(40)
+          //     // make.right.inset(28)
+          //     make.left.equalTo($("title").centerX).offset(110) //距离队伍的偏移量
+          //     make.top.inset(10)
+          //     make.height.equalTo(40)
+          //   }
+          // }
+        ],
+        data: [{
+          rows: rowToDayList
+        }]
+      },
+      layout: function (make, view) {
+        make.left.right.equalTo(0);
+        make.top.equalTo(45);
+        make.height.equalTo(view.super);
+        make.bottom.equalTo(100);
+      },
+      events: {
+        didSelect: function (tableView, indexPath) {
+          var row = indexPath.row;
+          //var scheduleid = rowToDayList[row].scheduleid.text;
+          //console.log(scheduleid)
+          // $app.openBrowser({
+          //   type: 10000,
+          //   url: "http://www.wanplus.com/schedule/" + scheduleid + ".html"
+          // })
+        }
+      }
+    }
+
+    ]
+  })
+  if (gameDataArr.list == false) {
     return $ui.toast("无数据");
   }
 }
