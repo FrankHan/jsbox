@@ -96,6 +96,17 @@ function render(resp) {
 
 
 
+  // json拼接：
+  // --> https://blog.csdn.net/qq_27851149/article/details/72793652    
+  // params.push({"group":i,"param":param});  
+
+  // http://blog.sina.com.cn/s/blog_6a6a2f3b0102wi66.html  
+
+
+  // {
+  //   title: "Section 0",
+  //   rows: ["0-0", "0-1", "0-2"]
+  // }
 
   for (var kk = 0; kk < gameDataArr.length; kk++) {//games[0],games[1]就是不同天
 
@@ -103,14 +114,20 @@ function render(resp) {
 
     // console.log(toDayList);
 
+    var objOneDay_Rows = [];
 
+    var objOneDay = [];
 
+    var objOneDay = [{//这必须是一个obj好像
+      title: "Section 0",
+      rows: objOneDay_Rows
+    }];
+    
 
     for (var i = 0; i < toDayList.length; i++) {// 当天的第0,1,2场比赛
 
-
-
       var obj = {};
+      // var arrToList = [];
       obj.title = {};
       obj.content = {};
       obj.gamename = {};
@@ -125,16 +142,39 @@ function render(resp) {
       obj.onewinscore.text = toDayList[i].home_score.toString();
       obj.twowinscore.text = toDayList[i].away_score.toString();
 
-      rowToDayList.push(obj);
+      // console.log(obj)
+      rowToDayList.push(obj);  //可以,所有信息一起显示
+
+      objOneDay_Rows.push(obj);  //$$$
+
     }
+
+    // console.log(objOneDay_Rows)
+
+    // objOneDay.push(objOneDay);
+
+    // console.log(objOneDay)
+
+    // console.log(objOneDay[0])
+
+    // console.log(objOneDay[1])
+
+    // console.log(rowToDayList)
+
+    // rowToDayList.push({"title":kk,"rows":obj}); 
 
   }
 
+  // var rowToDayList = objOneDay;  
+
+  // var rowToDayList = JSON.stringify(objOneDay);  
+
+  console.log(rowToDayList)
 
 
-  // $ui.alert(rowToDayList)
 
-  // console.log(rowToDayList);
+
+
   $ui.render({
 
     views: [{
@@ -146,7 +186,7 @@ function render(resp) {
           type: "label",
           props: {
             height: 20,
-            text: "test it",// headerDateTip,
+            text: "5月23日 星期一 这是测试",// headerDateTip,
             textColor: $color("#AAAAAA"),
             align: $align.center,
             font: $font(14)
@@ -235,7 +275,7 @@ function render(resp) {
       },
       layout: function (make, view) {
         make.left.right.equalTo(0);
-        make.top.equalTo(45);
+        make.top.equalTo(0);
         make.height.equalTo(view.super);
         make.bottom.equalTo(100);
       },
