@@ -80,8 +80,7 @@ function render(resp) {
   //console.log(headerDateTip)
 
 
-  // ----！！！ 给rowToDayList赋值
-  var rowToDayList = []; //每行比赛数据,用于最终传给list显示！
+
 
   // 二维数组初始化  ！！！！好像不行，因为每个天数下的比赛数目不一样。应该：先渲染第一天的数据，后面用list的insert方法插入？？
 
@@ -108,6 +107,9 @@ function render(resp) {
   //   rows: ["0-0", "0-1", "0-2"]
   // }
 
+  // ----！！！ 给rowToDayList赋值
+  var rowToDayList = []; //每行比赛数据,用于最终传给list显示！
+
   for (var kk = 0; kk < gameDataArr.length; kk++) {//games[0],games[1]就是不同天
 
     var toDayList = gameDataArr[kk].data; //当天比赛数据
@@ -122,7 +124,12 @@ function render(resp) {
       title: "Section 0",
       rows: objOneDay_Rows
     }];
-    
+
+    var elementOneDay = {//这必须是一个obj element好像
+      title: "Section 0",
+      rows: objOneDay_Rows
+    };
+
 
     for (var i = 0; i < toDayList.length; i++) {// 当天的第0,1,2场比赛
 
@@ -143,7 +150,7 @@ function render(resp) {
       obj.twowinscore.text = toDayList[i].away_score.toString();
 
       // console.log(obj)
-      rowToDayList.push(obj);  //可以,所有信息一起显示
+      // rowToDayList.push(obj);  //可以,所有信息一起显示  
 
       objOneDay_Rows.push(obj);  //$$$
 
@@ -152,6 +159,11 @@ function render(resp) {
     // console.log(objOneDay_Rows)
 
     // objOneDay.push(objOneDay);
+
+    // rowToDayList.push(objOneDay); //$$$
+
+    rowToDayList.push(elementOneDay);//$$$2   https://segmentfault.com/q/1010000006791550  https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=push%E4%B9%8B%E5%90%8E%E5%8F%98%E6%88%90%E4%BA%86%E5%AD%97%E7%AC%A6%E4%B8%B2&oq=var%2520obj%2520%253D%2520%257B%257D%253B&rsv_pq=ec9d6f200001157f&rsv_t=bbd2CJwpyWLaqOSlTgiJcZvCannCBgnlH0q%2FKjDoOoUnbPx5oU9S5mzIXH4&rqlang=cn&rsv_enter=1&inputT=8775&rsv_sug3=66&rsv_sug1=27&rsv_sug7=100&rsv_sug2=0&rsv_sug4=8775
+
 
     // console.log(objOneDay)
 
@@ -167,9 +179,11 @@ function render(resp) {
 
   // var rowToDayList = objOneDay;  
 
-  // var rowToDayList = JSON.stringify(objOneDay);  
+  // var rowToDayList = JSON.stringify(rowToDayList);  
 
   console.log(rowToDayList)
+
+  console.log(typeof(rowToDayList)) //object
 
 
 
