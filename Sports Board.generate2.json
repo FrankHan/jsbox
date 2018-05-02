@@ -1,0 +1,43 @@
+//[
+
+{
+  "title": "Section 0",//title
+  "rows": [//rows
+    {
+      "onewinscore": {
+        "text": "0"
+      },
+      "content": {},
+      "twowinscore": {
+        "text": "0"
+      },
+      "isOver": {},
+      "scheduleid": {},
+      "title": {
+        "text": "76人 : 凯尔特人"
+      },
+      "gamename": {},
+      "twoicon": {},
+      "oneicon": {}
+    },
+    {
+      "onewinscore": {
+        "text": "0"
+      },
+      "content": {},
+      "twowinscore": {
+        "text": "0"
+      },
+      "isOver": {},
+      "scheduleid": {},
+      "title": {
+        "text": "骑士 : 猛龙"
+      },
+      "gamename": {},
+      "twoicon": {},
+      "oneicon": {}
+    }
+  ]
+}
+
+// ,{...}]
