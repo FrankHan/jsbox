@@ -1,25 +1,28 @@
 /**
- * @Version 1.5
+ * @Version 1.6
  * @author QvQ
  * @date 2018.5.4
  * @brief 
  *   1. 加入了自动更新功能
  *   2. 自动定位滚动到今天
+ *   3. 下一步会提供更全面的各种比赛
  * @/brief
  */
 
 
 // $app.tips("点击比赛即可查看详情");
 
+"use strict"
+
 // ----版本自动更新
-let appVersion = 1.5
-let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
+let appVersion = 1.6
+let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 if (needCheckup()) {
   checkupVersion()
 } else {
-  // 初始时获取NBA比赛
-getDatabyGametype("nba") //nba, chlg
+  // 初始时获取nba比赛
+  getDatabyGametype("nba")
 }
 
 //需要检查更新？
@@ -57,7 +60,8 @@ function needUpdate(nv, lv) {
 
 //升级插件
 function updateAddin() {
-  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())
+  //let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())  //这里可以改icon，是否只在主程序运行等
+  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=eSports%20All&icon=icon_039.png&types=1")  //这里可以改icon，是否只在主程序运行等
   $app.openURL(url2i)
 }
 
@@ -77,8 +81,8 @@ function checkupVersion() {
       if (needUpdate(appVersion, lv)) {
         sureToUpdate(str)
       } else {
-        // 初始时获取NBA比赛
-getDatabyGametype("nba") //nba, chlg
+        // 初始时获取nba比赛
+        getDatabyGametype("nba")
       }
     }
   })
@@ -101,6 +105,13 @@ function getUpDes(str) {
   let fixDes = des.replace(/\*/g, "")
   myLog(fixDes)
   return fixDes
+}
+
+//myLog
+function myLog(text) {
+  if ($app.env == $env.app) {
+    $console.log(text)
+  }
 }
 
 //当前插件名
@@ -136,6 +147,7 @@ function sureToUpdate(str) {
     ]
   })
 }
+
 
 
 
@@ -435,12 +447,12 @@ function getDatabyGametype(gametype) {
                 var chosenItem = data[0];
                 switch (chosenItem) {
                   case "NBA":
-                  getDatabyGametype("nba") 
+                    getDatabyGametype("nba")
                     break;
                   case "欧冠":
-                  getDatabyGametype("chlg") 
+                    getDatabyGametype("chlg")
                     break;
-                 
+
                 }
               }
             })
