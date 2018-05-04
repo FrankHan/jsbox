@@ -1,10 +1,10 @@
 /**
- * @Version 2.0
+ * @Version 2.1
  * @author QvQ
  * @date 2018.5.4
  * @brief 
- *   1. 需要更新时：将先展示比分，后自动更新，减少等待
- *   2. 更新提示使用toast，不遮挡主界面
+ *   1. 未开始的比赛不显示比分
+ *   2. 需要更新时：将先展示比分，后自动更新，减少等待
  *   3. 下一步会提供更全面的各种比赛
  * @/brief
  */
@@ -15,7 +15,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.0
+let appVersion = 2.1
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 // 初始时获取nba比赛
@@ -73,6 +73,10 @@ function getDatabyGametype(gametype) {
     // ----！！！ 给rowToDayList赋值
     var rowToDayList = []; //每行比赛数据,用于最终传给list显示！
 
+
+    var nowTimestamp = new Date().getTime();
+
+
     for (var kk = 0; kk < gameDataArr.length; kk++) { //games[0],games[1]就是不同天
 
       var toDayList = gameDataArr[kk].data; //当天比赛数据
@@ -115,10 +119,19 @@ function getDatabyGametype(gametype) {
 
           // console.log("非比赛，无关的")
 
-        } else {
+        } else {//不是广告
           obj.teams.text = toDayList[i].home_name + " : " + toDayList[i].away_name;
           obj.onewinscore.text = toDayList[i].home_score.toString();
           obj.twowinscore.text = toDayList[i].away_score.toString();
+
+          // 未开始的比赛去除比分
+          var matchTime = toDayList[i].begin_time;
+          if (matchTime > nowTimestamp / 1000) {//还没开始的比赛
+            obj.onewinscore.text = "";
+            obj.twowinscore.text = "";
+          }
+
+
 
           obj.gidUrl = toDayList[i].gid.toString();
 
@@ -140,23 +153,23 @@ function getDatabyGametype(gametype) {
 
               break;
             case "chlg":
-              obj.isOver.text = toDayList[i].status.desc;
+              obj.isOver.text = toDayList[i].status.desc;// + toDayList[i].stadium_name_en; //球场
               obj.content.text = toDayList[i].type_block;
               break;
 
           }
 
-          objOneDay_Rows.push(obj); //$$$
+          objOneDay_Rows.push(obj); //
         }
 
       }
-      rowToDayList.push(elementOneDay); //$$$2   https://segmentfault.com/q/1010000006791550  https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=push%E4%B9%8B%E5%90%8E%E5%8F%98%E6%88%90%E4%BA%86%E5%AD%97%E7%AC%A6%E4%B8%B2&oq=var%2520obj%2520%253D%2520%257B%257D%253B&rsv_pq=ec9d6f200001157f&rsv_t=bbd2CJwpyWLaqOSlTgiJcZvCannCBgnlH0q%2FKjDoOoUnbPx5oU9S5mzIXH4&rqlang=cn&rsv_enter=1&inputT=8775&rsv_sug3=66&rsv_sug1=27&rsv_sug7=100&rsv_sug2=0&rsv_sug4=8775
+      rowToDayList.push(elementOneDay); //
 
     }
 
     // console.log(rowToDayList) //可以用于显示拼接完成的data，用于传给list显示
 
-// list所显示的header
+    // list所显示的header
     switch (gametype) {
       case "nba":
         var headerDisplay = "NBA赛程板";
@@ -236,7 +249,7 @@ function getDatabyGametype(gametype) {
               id: "isOver",// 比赛时间是否结束
               textColor: $color("#888888"),
               font: $font(14)
-            }, 
+            },
             layout: function (make, view) {
               //make.left.right.equalTo(180);
 
