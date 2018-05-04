@@ -1,11 +1,10 @@
 /**
- * @Version 2.1
+ * @Version 2.3
  * @author QvQ
  * @date 2018.5.4
  * @brief 
  *   1. 未开始的比赛不显示比分
- *   2. 需要更新时：将先展示比分，后自动更新，减少等待
- *   3. 下一步会提供更全面的各种比赛
+ *   2. 加入了西甲德甲英超等比赛
  * @/brief
  */
 
@@ -15,7 +14,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.1
+let appVersion = 2.3
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 // 初始时获取nba比赛
@@ -152,10 +151,11 @@ function getDatabyGametype(gametype) {
               }
 
               break;
-            case "chlg":
+            case "chlg": case "liga": case "epl": case "bund":
               obj.isOver.text = toDayList[i].status.desc;// + toDayList[i].stadium_name_en; //球场
               obj.content.text = toDayList[i].type_block;
               break;
+
 
           }
 
@@ -312,7 +312,7 @@ function getDatabyGametype(gametype) {
               case "nba":
                 var detailUrl = "https://m.hupu.com/" + gametype + "/game/recap_" + gidUrl + ".html"
                 break;
-              case "chlg":
+              case "chlg": case "liga": case "epl": case "bund":
                 var detailUrl = "https://m.hupu.com/soccer/games/event/" + gidUrl   // stats,event,recap,preview
                 break;
 
@@ -351,7 +351,7 @@ function getDatabyGametype(gametype) {
             $pick.data({
               props: {
                 items: [
-                  ["NBA", "欧冠"]   //nba,chlg
+                  ["NBA", "欧冠", "西甲", "英超", "德甲"]   //nba,chlg
                 ]
               },
               handler: function (data) {
@@ -363,6 +363,15 @@ function getDatabyGametype(gametype) {
                     break;
                   case "欧冠":
                     getDatabyGametype("chlg")
+                    break;
+                  case "西甲":
+                    getDatabyGametype("liga")
+                    break;
+                  case "英超":
+                    getDatabyGametype("epl")
+                    break;
+                  case "德甲":
+                    getDatabyGametype("bund")
                     break;
 
                 }
