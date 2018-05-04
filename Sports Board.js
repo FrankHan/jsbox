@@ -1,10 +1,10 @@
 /**
- * @Version 1.9
+ * @Version 2.0
  * @author QvQ
  * @date 2018.5.4
  * @brief 
- *   1. 加入了自动更新功能
- *   2. 自动定位滚动到今天
+ *   1. 需要更新时：将先展示比分，后自动更新，减少等待
+ *   2. 更新提示使用toast，不遮挡主界面
  *   3. 下一步会提供更全面的各种比赛
  * @/brief
  */
@@ -15,142 +15,11 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 1.9
+let appVersion = 2.0
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
-if (needCheckup()) {
-  checkupVersion()
-} else {
-  // 初始时获取nba比赛
-  getDatabyGametype("nba")
-}
-
-//需要检查更新？
-function needCheckup() {
-  let nDate = new Date()
-  let lastCT = $cache.get("lastCT")
-  if (lastCT == undefined) {
-    $cache.set("lastCT", nDate)
-    return true
-  } else {
-    let tdoa = (nDate.getTime() - lastCT.getTime()) / (60 * 1000)
-    let interval = 1440
-    if ($app.env == $env.app) {
-      interval = 15
-    }
-    myLog("离下次检测更新: " + (interval - tdoa) + "  分钟")
-    if (tdoa > interval) {
-      $cache.set("lastCT", nDate)
-      return true
-    } else {
-      return false
-    }
-  }
-}
-
-//需要更新？
-function needUpdate(nv, lv) {
-  let m = parseFloat(nv) - parseFloat(lv)
-  if (m < 0) {
-    return true
-  } else {
-    return false
-  }
-}
-
-//升级插件
-function updateAddin() {
-  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())  //这里可以改icon，是否只在主程序运行等
-  // let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=Sports%20Board&icon=icon_039.png&types=1")  //这里可以改icon，是否只在主程序运行等
-  $app.openURL(url2i)
-}
-
-//检查版本
-function checkupVersion() {
-  $ui.loading("检查更新")
-  $http.download({
-    url: addinURL,
-    showsProgress: false,
-    timeout: 5,
-    handler: function (resp) {
-      $console.info(resp)
-      let str = resp.data.string
-      $console.info(str)
-      let lv = getVFS(str)
-      $ui.loading(false)
-      if (needUpdate(appVersion, lv)) {
-        sureToUpdate(str)
-      } else {
-        // 初始时获取nba比赛
-        getDatabyGametype("nba")
-      }
-    }
-  })
-}
-
-//获取版本号
-function getVFS(str) {
-  let vIndex = str.indexOf("@Version ")
-  let start = vIndex + 9
-  let end = start + 3
-  let lv = str.substring(start, end)
-  return lv
-}
-
-//获取更新说明
-function getUpDes(str) {
-  let bIndex = str.indexOf("@brief")
-  let eIndex = str.indexOf("@/brief")
-  let des = str.substring(bIndex + 6, eIndex)
-  let fixDes = des.replace(/\*/g, "")
-  myLog(fixDes)
-  return fixDes
-}
-
-//myLog
-function myLog(text) {
-  if ($app.env == $env.app) {
-    $console.log(text)
-  }
-}
-
-//当前插件名
-function currentName() {
-  let name = $addin.current.name
-  let end = name.length - 3
-  return name.substring(0, end)
-}
-
-//当前插件图标
-function currentIcon() {
-  return $addin.current.icon
-}
-
-//确定升级？
-function sureToUpdate(str) {
-  let des = getUpDes(str)
-  $ui.alert({
-    title: "发现新版本",
-    message: des + "\n是否更新？",
-    actions: [{
-      title: "是",
-      handler: function () {
-        updateAddin()
-      }
-    },
-    {
-      title: "否",
-      handler: function () {
-
-      }
-    }
-    ]
-  })
-}
-
-
-
-
+// 初始时获取nba比赛
+getDatabyGametype("nba")
 
 
 function getDatabyGametype(gametype) {
@@ -318,6 +187,16 @@ function getDatabyGametype(gametype) {
               textColor: $color("#AAAAAA"),
               align: $align.center,
               font: $font(14)
+            }
+          },
+          footer: {
+            type: "label",
+            props: {
+              height: 40,//40,下部拉动距离，为了所有比赛不被遮挡
+              text: "",
+              textColor: $color("#AAAAAA"),
+              align: $align.center,
+              font: $font(12)
             }
           },
 
@@ -493,4 +372,142 @@ function getDatabyGametype(gametype) {
     })
 
   }
+}
+
+
+
+// ----版本自动更新 主程序
+
+if (needCheckup()) {
+  checkupVersion()
+} else {
+  // 初始时获取nba比赛
+  // getDatabyGametype("nba")
+  // 还没到15min需要检查更新的时候
+}
+
+//需要检查更新？
+function needCheckup() {
+  let nDate = new Date()
+  let lastCT = $cache.get("lastCT")
+  if (lastCT == undefined) {
+    $cache.set("lastCT", nDate)
+    return true
+  } else {
+    let tdoa = (nDate.getTime() - lastCT.getTime()) / (60 * 1000)
+    let interval = 1440
+    if ($app.env == $env.app) {
+      interval = 15 //检查更新的间距，min
+    }
+    myLog("离下次检测更新: " + (interval - tdoa) + "  分钟")
+    if (tdoa > interval) {
+      $cache.set("lastCT", nDate)
+      return true
+    } else {
+      return false
+    }
+  }
+}
+
+//需要更新？
+function needUpdate(nv, lv) {
+  let m = parseFloat(nv) - parseFloat(lv)
+  if (m < 0) {
+    return true
+  } else {
+    return false
+  }
+}
+
+//升级插件
+function updateAddin() {
+  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())  //这里可以改icon，是否只在主程序运行等
+  // let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=Sports%20Board&icon=icon_039.png&types=1")  //这里可以改icon，是否只在主程序运行等
+  $app.openURL(url2i)
+}
+
+//检查版本
+function checkupVersion() {
+  // $ui.loading("检查更新")
+  $ui.toast("检查更新...")
+  $http.download({
+    url: addinURL,
+    showsProgress: false,
+    timeout: 5,
+    handler: function (resp) {
+      $console.info(resp)
+      let str = resp.data.string
+      $console.info(str)
+      let lv = getVFS(str)
+      $ui.loading(false)
+      if (needUpdate(appVersion, lv)) {
+        sureToUpdate(str)
+      } else {
+        $ui.toast("已经是最新")
+        // 初始时获取nba比赛
+        // getDatabyGametype("nba")
+        // 不需要更新
+      }
+    }
+  })
+}
+
+//获取版本号
+function getVFS(str) {
+  let vIndex = str.indexOf("@Version ")
+  let start = vIndex + 9
+  let end = start + 3
+  let lv = str.substring(start, end)
+  return lv
+}
+
+//获取更新说明
+function getUpDes(str) {
+  let bIndex = str.indexOf("@brief")
+  let eIndex = str.indexOf("@/brief")
+  let des = str.substring(bIndex + 6, eIndex)
+  let fixDes = des.replace(/\*/g, "")
+  myLog(fixDes)
+  return fixDes
+}
+
+//myLog
+function myLog(text) {
+  if ($app.env == $env.app) {
+    $console.log(text)
+  }
+}
+
+//当前插件名
+function currentName() {
+  let name = $addin.current.name
+  let end = name.length - 3
+  return name.substring(0, end)
+}
+
+//当前插件图标
+function currentIcon() {
+  return $addin.current.icon
+}
+
+//确定升级？
+function sureToUpdate(str) {
+  let des = getUpDes(str)
+  $ui.alert({
+    title: "发现新版本",
+    message: des + "\n是否更新？",
+    actions: [{
+      title: "是",
+      handler: function () {
+        updateAddin()
+      }
+    },
+    {
+      title: "否",
+      handler: function () {
+
+      }
+    }
+    ]
+  })
 }
