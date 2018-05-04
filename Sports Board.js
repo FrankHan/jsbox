@@ -1,5 +1,5 @@
 /**
- * @Version 1.6
+ * @Version 1.7
  * @author QvQ
  * @date 2018.5.4
  * @brief 
@@ -15,7 +15,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 1.6
+let appVersion = 1.7
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 if (needCheckup()) {
