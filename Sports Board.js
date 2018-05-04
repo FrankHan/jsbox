@@ -1,5 +1,5 @@
 /**
- * @Version 1.7
+ * @Version 1.9
  * @author QvQ
  * @date 2018.5.4
  * @brief 
@@ -15,7 +15,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 1.7
+let appVersion = 1.9
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 if (needCheckup()) {
@@ -60,8 +60,8 @@ function needUpdate(nv, lv) {
 
 //升级插件
 function updateAddin() {
-  //let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())  //这里可以改icon，是否只在主程序运行等
-  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=eSports%20All&icon=icon_039.png&types=1")  //这里可以改icon，是否只在主程序运行等
+  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())  //这里可以改icon，是否只在主程序运行等
+  // let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=Sports%20Board&icon=icon_039.png&types=1")  //这里可以改icon，是否只在主程序运行等
   $app.openURL(url2i)
 }
 
@@ -177,7 +177,7 @@ function getDatabyGametype(gametype) {
   function render(resp) {
     var data = resp.data
 
-    console.log(data)
+    // console.log(data)  // 可以用于显示所有resp
     var currentDate = data.result.days.current; //20180501
 
     var arrDayForScrollLocation_section = []
@@ -213,16 +213,12 @@ function getDatabyGametype(gametype) {
 
       if (dayForScrollLocation >= currentDate) {
 
-        //arrDayForScrollLocation.push(dayForScrollLocation)
-
         arrDayForScrollLocation_section.push(dayForScrollLocation_section)
 
-        //console.log(arrDayForScrollLocation_section)
       }
 
       var dateblockForSectionTitle = gamesList[kk].date_block;
 
-      // console.log(toDayList);
 
       var objOneDay_Rows = [];
 
@@ -260,20 +256,27 @@ function getDatabyGametype(gametype) {
           switch (gametype) {
             case "nba":
               obj.isOver.text = toDayList[i].process;
+              var nbaMatchtype = toDayList[i].match_type;
+              switch (nbaMatchtype) {
+                case "PLAYOFF":
+                  obj.content.text = "NBA季后赛";
+                  break;
+                case "SEASON":
+                  obj.content.text = "NBA常规赛";
+                  break;
+                default:
+                  obj.content.text = "NBA";
+                  break;
+              }
+
               break;
             case "chlg":
               obj.isOver.text = toDayList[i].status.desc;
+              obj.content.text = toDayList[i].type_block;
               break;
 
-            case "使命召唤OL":
-              getGameDataRender(8)
-              break;
           }
 
-
-          obj.content.text = toDayList[i].match_type;
-
-          //obj.content.text = toDayList[i].type_block;
           objOneDay_Rows.push(obj); //$$$
         }
 
@@ -282,7 +285,22 @@ function getDatabyGametype(gametype) {
 
     }
 
-    console.log(rowToDayList)
+    // console.log(rowToDayList) //可以用于显示拼接完成的data，用于传给list显示
+
+// list所显示的header
+    switch (gametype) {
+      case "nba":
+        var headerDisplay = "NBA赛程板";
+        break;
+      case "chlg":
+        var headerDisplay = "欧冠赛程板";
+        break;
+      default:
+        var headerDisplay = "赛程板";
+        break;
+    }
+
+
 
     $ui.render({
 
@@ -291,12 +309,12 @@ function getDatabyGametype(gametype) {
         props: {
           id: "listid",
           grouped: true,
-          rowHeight: 70, // 行高
+          rowHeight: 73, // 行高
           header: {
             type: "label",
             props: {
               height: 0,
-              text: "NBA赛程板", // headerDateTip,
+              text: headerDisplay, // header,
               textColor: $color("#AAAAAA"),
               align: $align.center,
               font: $font(14)
@@ -306,8 +324,8 @@ function getDatabyGametype(gametype) {
           template: [{
             type: "label",
             props: {
-              id: "isOver", // 进行中
-              font: $font(10),
+              id: "content", // 比赛类型
+              font: $font(11),
               textColor: $color("#888888")
             },
             layout: function (make, view) {
@@ -321,23 +339,25 @@ function getDatabyGametype(gametype) {
             type: "label",
             props: {
               id: "teams", // 队伍
-              font: $font(20)
+              font: $font(20),
+              autoFontSize: true //字体动态调整
             },
             layout: function (make, view) {
               make.centerX.equalTo(0)
-              make.top.equalTo(18)
+              make.top.equalTo(24)
               // make.left.equalTo(160)
               // make.top.right.inset(8)
               make.height.equalTo(24)
+              make.width.lessThanOrEqualTo(190) //字体动态调整
             }
           },
           {
             type: "label",
             props: {
-              id: "content",
+              id: "isOver",// 比赛时间是否结束
               textColor: $color("#888888"),
-              font: $font(15)
-            }, // 比赛时间 id content
+              font: $font(14)
+            }, 
             layout: function (make, view) {
               //make.left.right.equalTo(180);
 
@@ -357,7 +377,7 @@ function getDatabyGametype(gametype) {
             layout: function (make) {
               // make.left.inset(28)
               make.right.equalTo($("teams").centerX).offset(-110) //距离队伍的偏移量
-              make.top.inset(10)
+              make.top.inset(16)
               make.height.equalTo(40)
             }
           },
@@ -373,7 +393,7 @@ function getDatabyGametype(gametype) {
               //make.right.equalTo(40)
               // make.right.inset(28)
               make.left.equalTo($("teams").centerX).offset(110) //距离队伍的偏移量
-              make.top.inset(10)
+              make.top.inset(16)
               make.height.equalTo(40)
             }
           }
