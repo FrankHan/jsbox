@@ -1,214 +1,297 @@
-// 原作者：wlor0623，  https://github.com/wlor0623/jsbox/blob/master/lolscore.js
-// 由 QvQ修改： https://github.com/FrankHan/jsbox/blob/master/LOL%20All.js  
-
-
-// menu 是天，对应于games[0], gamesp[1]，不行：太多天了。必须使用list加section的方法
-
-let appVersion = 1.2
+/**
+ * @Version 1.5
+ * @author QvQ
+ * @date 2018.5.4
+ * @brief 
+ *   1. 加入了自动更新功能
+ *   2. 自动定位滚动到今天
+ * @/brief
+ */
 
 
 // $app.tips("点击比赛即可查看详情");
-var resp = []
-$http.get({
-  url: "https://games.mobileapi.hupu.com/3/7.1.18/nba/getGames?time_zone=Asia%2FShanghai&direc=next&client=cbf23a9fe5297e062f92690a7ed26af3c6647078&night=0&crt=1525160359&advId=68388FF5-D314-42F2-9B5B-B66FC782C857&clientId=35294508&sign=1801bb7c73ba11266d2db1ec1bbb37db&preload=0",
-  header: {
-    "Accept-Encoding": "gzip",
-    "Connection": "keep-alive",
-    "Cookie": "cpck=eyJwcm9qZWN0SWQiOiIzIiwiY2xpZW50IjoiY2JmMjNhOWZlNTI5N2UwNjJmOTI2OTBhN2VkMjZhZjNjNjY0NzA3OCIsImlkZmEiOiI2ODM4OEZGNS1EMzE0LTQyRjItOUI1Qi1CNjZGQzc4MkM4NTcifQ==; __dacevid3=0x77ff9195c945e6ea; cid=35294508",
-    "Host": "games.mobileapi.hupu.com",
-    "Proxy-Connection": "keep-alive",
-    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_3 like Mac OS X) AppleWebKit/603.3.8 (KHTML, like Gecko) Mobile/14G60 isp/460.02 network/WIFI prokanqiu/7.1.18.55 iPhone8,4"
-  },
-  handler: function (resp) {
-    // resp = resp;
 
+// ----版本自动更新
+let appVersion = 1.5
+let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
-    // ---定位到今天并render
-    // var data = resp.data
+if (needCheckup()) {
+  checkupVersion()
+} else {
+  // 初始时获取NBA比赛
+getDatabyGametype("nba") //nba, chlg
+}
 
-    // console.log(data)
-
-    // $ui.alert(data)
-
-
-
-    render(resp)
-
-
+//需要检查更新？
+function needCheckup() {
+  let nDate = new Date()
+  let lastCT = $cache.get("lastCT")
+  if (lastCT == undefined) {
+    $cache.set("lastCT", nDate)
+    return true
+  } else {
+    let tdoa = (nDate.getTime() - lastCT.getTime()) / (60 * 1000)
+    let interval = 1440
+    if ($app.env == $env.app) {
+      interval = 15
+    }
+    myLog("离下次检测更新: " + (interval - tdoa) + "  分钟")
+    if (tdoa > interval) {
+      $cache.set("lastCT", nDate)
+      return true
+    } else {
+      return false
+    }
   }
-})
+}
 
-
-
-// Main program
-function render(resp) {
-  var data = resp.data
-
-  //  console.log(data)
-  var currentDate = data.result.days.current; //20180501
-
-  // $ui.alert(currentDate)
-
-  // var rowsData = []; //列表信息
-  var gamesList = data.result.games;
-
-  // var date_block = gamesList[0].date_block;
-  // $ui.alert(date_block)
-
-
-  var gamesListIndex = [];
-  var gameDataArr = []; //具体数据值
-
-  for (var key in gamesList) {
-    gamesListIndex.push(key); // 输出数组下标 0,1,...
-    //timeForHeader.push(gamesList[key].day);  // day,date_block
-    //console.log(key)  //打印日期
-    gameDataArr.push(gamesList[key]);
+//需要更新？
+function needUpdate(nv, lv) {
+  let m = parseFloat(nv) - parseFloat(lv)
+  if (m < 0) {
+    return true
+  } else {
+    return false
   }
+}
+
+//升级插件
+function updateAddin() {
+  let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())
+  $app.openURL(url2i)
+}
+
+//检查版本
+function checkupVersion() {
+  $ui.loading("检查更新")
+  $http.download({
+    url: addinURL,
+    showsProgress: false,
+    timeout: 5,
+    handler: function (resp) {
+      $console.info(resp)
+      let str = resp.data.string
+      $console.info(str)
+      let lv = getVFS(str)
+      $ui.loading(false)
+      if (needUpdate(appVersion, lv)) {
+        sureToUpdate(str)
+      } else {
+        // 初始时获取NBA比赛
+getDatabyGametype("nba") //nba, chlg
+      }
+    }
+  })
+}
+
+//获取版本号
+function getVFS(str) {
+  let vIndex = str.indexOf("@Version ")
+  let start = vIndex + 9
+  let end = start + 3
+  let lv = str.substring(start, end)
+  return lv
+}
+
+//获取更新说明
+function getUpDes(str) {
+  let bIndex = str.indexOf("@brief")
+  let eIndex = str.indexOf("@/brief")
+  let des = str.substring(bIndex + 6, eIndex)
+  let fixDes = des.replace(/\*/g, "")
+  myLog(fixDes)
+  return fixDes
+}
+
+//当前插件名
+function currentName() {
+  let name = $addin.current.name
+  let end = name.length - 3
+  return name.substring(0, end)
+}
+
+//当前插件图标
+function currentIcon() {
+  return $addin.current.icon
+}
+
+//确定升级？
+function sureToUpdate(str) {
+  let des = getUpDes(str)
+  $ui.alert({
+    title: "发现新版本",
+    message: des + "\n是否更新？",
+    actions: [{
+      title: "是",
+      handler: function () {
+        updateAddin()
+      }
+    },
+    {
+      title: "否",
+      handler: function () {
+
+      }
+    }
+    ]
+  })
+}
 
 
-  // $ui.alert(gameDataArr)
 
 
 
+function getDatabyGametype(gametype) {
+
+  var resp = []
+  $http.get({
+    url: "https://games.mobileapi.hupu.com/3/7.1.18/" + gametype + "/getGames?time_zone=Asia%2FShanghai&direc=next&client=cbf23a9fe5297e062f92690a7ed26af3c6647078&night=0&crt=1525160359&advId=68388FF5-D314-42F2-9B5B-B66FC782C857&clientId=35294508&sign=1801bb7c73ba11266d2db1ec1bbb37db&preload=0",
+    header: {
+      "Accept-Encoding": "gzip",
+      "Connection": "keep-alive",
+      "Cookie": "cpck=eyJwcm9qZWN0SWQiOiIzIiwiY2xpZW50IjoiY2JmMjNhOWZlNTI5N2UwNjJmOTI2OTBhN2VkMjZhZjNjNjY0NzA3OCIsImlkZmEiOiI2ODM4OEZGNS1EMzE0LTQyRjItOUI1Qi1CNjZGQzc4MkM4NTcifQ==; __dacevid3=0x77ff9195c945e6ea; cid=35294508",
+      "Host": "games.mobileapi.hupu.com",
+      "Proxy-Connection": "keep-alive",
+      "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_3 like Mac OS X) AppleWebKit/603.3.8 (KHTML, like Gecko) Mobile/14G60 isp/460.02 network/WIFI prokanqiu/7.1.18.55 iPhone8,4"
+    },
+    handler: function (resp) {
+
+      render(resp)
+
+    }
+  })
+
+  // Main program
+  function render(resp) {
+    var data = resp.data
+
+    console.log(data)
+    var currentDate = data.result.days.current; //20180501
+
+    var arrDayForScrollLocation_section = []
+
+    // $ui.alert(currentDate)
+
+    // var rowsData = []; //列表信息
+    var gamesList = data.result.games;
+
+    //  var dateblockForSectionTitle = gamesList[0].date_block;
+    // $ui.alert(date_block)
+
+    var gamesListIndex = [];
+    var gameDataArr = []; //具体数据值
+
+    for (var key in gamesList) {
+      gamesListIndex.push(key); // 输出数组下标 0,1,...
+
+      gameDataArr.push(gamesList[key]);
+    }
 
 
-  // console.log(timeArr)
 
-  //var headerDateTip = gameDataArr.lDate; //头部日期提示
+    // ----！！！ 给rowToDayList赋值
+    var rowToDayList = []; //每行比赛数据,用于最终传给list显示！
 
-  //console.log(headerDateTip)
+    for (var kk = 0; kk < gameDataArr.length; kk++) { //games[0],games[1]就是不同天
 
+      var toDayList = gameDataArr[kk].data; //当天比赛数据
+      var dayForScrollLocation = gameDataArr[kk].day;
 
+      var dayForScrollLocation_section = kk;
 
+      if (dayForScrollLocation >= currentDate) {
 
-  // 二维数组初始化  ！！！！好像不行，因为每个天数下的比赛数目不一样。应该：先渲染第一天的数据，后面用list的insert方法插入？？
+        //arrDayForScrollLocation.push(dayForScrollLocation)
 
+        arrDayForScrollLocation_section.push(dayForScrollLocation_section)
 
-  // var rowToDayList = new Array();  //先声明一维 
-  // for (var k = 0; k < i; k++) {    //一维长度为i,i为变量，可以根据实际情况改变  
-  //   rowToDayList[k] = new Array();  //声明二维，每一个一维数组里面的一个元素都是一个数组；  
-  //   for (var j = 0; j < p; j++) {   //一维数组里面每个元素数组可以包含的数量p，p也是一个变量；   
-  //     rowToDayList[k][j] = "";    //这里将变量初始化，我这边统一初始化为空，后面在用所需的值覆盖里面的值 
-  //   }
-  // }
+        //console.log(arrDayForScrollLocation_section)
+      }
 
+      var dateblockForSectionTitle = gamesList[kk].date_block;
 
+      // console.log(toDayList);
 
-  // json拼接：
-  // --> https://blog.csdn.net/qq_27851149/article/details/72793652    
-  // params.push({"group":i,"param":param});  
-
-  // http://blog.sina.com.cn/s/blog_6a6a2f3b0102wi66.html  
+      var objOneDay_Rows = [];
 
 
-  // {
-  //   title: "Section 0",
-  //   rows: ["0-0", "0-1", "0-2"]
-  // }
+      var elementOneDay = { //这必须是一个obj element好像
+        title: dateblockForSectionTitle,
+        rows: objOneDay_Rows
+      };
 
-  // ----！！！ 给rowToDayList赋值
-  var rowToDayList = []; //每行比赛数据,用于最终传给list显示！
+      for (var i = 0; i < toDayList.length; i++) { // 当天的第0,1,2场比赛
 
-  for (var kk = 0; kk < gameDataArr.length; kk++) {//games[0],games[1]就是不同天
+        var obj = {};
 
-    var toDayList = gameDataArr[kk].data; //当天比赛数据
+        obj.teams = {};
+        obj.content = {};
 
-    // console.log(toDayList);
+        obj.onewinscore = {};
+        obj.twowinscore = {};
+        obj.scheduleid = {};
+        obj.isOver = {}; //是否正在进行中
+        //obj.oneicon = {}; //一队图标
+        //obj.twoicon = {}; //二队图标
 
-    var objOneDay_Rows = [];
+        if (toDayList[i].home_name == "精彩瞬间" || toDayList[i].home_name == "疯狂竞猜" || toDayList[i].away_name == "路人王" || toDayList[i].home_name == "虎扑") {
 
-    var objOneDay = [];
+          // console.log("非比赛，无关的")
 
-    var objOneDay = [{//这必须是一个obj好像
-      title: "Section 0",
-      rows: objOneDay_Rows
-    }];
+        } else {
+          obj.teams.text = toDayList[i].home_name + " : " + toDayList[i].away_name;
+          obj.onewinscore.text = toDayList[i].home_score.toString();
+          obj.twowinscore.text = toDayList[i].away_score.toString();
 
-    var elementOneDay = {//这必须是一个obj element好像
-      title: "Section 0",
-      rows: objOneDay_Rows
-    };
+          obj.gidUrl = toDayList[i].gid.toString();
+
+          switch (gametype) {
+            case "nba":
+              obj.isOver.text = toDayList[i].process;
+              break;
+            case "chlg":
+              obj.isOver.text = toDayList[i].status.desc;
+              break;
+
+            case "使命召唤OL":
+              getGameDataRender(8)
+              break;
+          }
 
 
-    for (var i = 0; i < toDayList.length; i++) {// 当天的第0,1,2场比赛
+          obj.content.text = toDayList[i].match_type;
 
-      var obj = {};
-      // var arrToList = [];
-      obj.title = {};
-      obj.content = {};
-      obj.gamename = {};
-      obj.onewinscore = {};
-      obj.twowinscore = {};
-      obj.scheduleid = {};
-      obj.isOver = {};//是否正在进行中
-      obj.oneicon = {}; //一队图标
-      obj.twoicon = {}; //二队图标
+          //obj.content.text = toDayList[i].type_block;
+          objOneDay_Rows.push(obj); //$$$
+        }
 
-      obj.title.text = toDayList[i].home_name + " : " + toDayList[i].away_name;
-      obj.onewinscore.text = toDayList[i].home_score.toString();
-      obj.twowinscore.text = toDayList[i].away_score.toString();
-
-      // console.log(obj)
-      // rowToDayList.push(obj);  //可以,所有信息一起显示  
-
-      objOneDay_Rows.push(obj);  //$$$
+      }
+      rowToDayList.push(elementOneDay); //$$$2   https://segmentfault.com/q/1010000006791550  https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=push%E4%B9%8B%E5%90%8E%E5%8F%98%E6%88%90%E4%BA%86%E5%AD%97%E7%AC%A6%E4%B8%B2&oq=var%2520obj%2520%253D%2520%257B%257D%253B&rsv_pq=ec9d6f200001157f&rsv_t=bbd2CJwpyWLaqOSlTgiJcZvCannCBgnlH0q%2FKjDoOoUnbPx5oU9S5mzIXH4&rqlang=cn&rsv_enter=1&inputT=8775&rsv_sug3=66&rsv_sug1=27&rsv_sug7=100&rsv_sug2=0&rsv_sug4=8775
 
     }
 
-    // console.log(objOneDay_Rows)
+    console.log(rowToDayList)
 
-    // objOneDay.push(objOneDay);
+    $ui.render({
 
-    // rowToDayList.push(objOneDay); //$$$
+      views: [{
+        type: "list",
+        props: {
+          id: "listid",
+          grouped: true,
+          rowHeight: 70, // 行高
+          header: {
+            type: "label",
+            props: {
+              height: 0,
+              text: "NBA赛程板", // headerDateTip,
+              textColor: $color("#AAAAAA"),
+              align: $align.center,
+              font: $font(14)
+            }
+          },
 
-    rowToDayList.push(elementOneDay);//$$$2   https://segmentfault.com/q/1010000006791550  https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&tn=baidu&wd=push%E4%B9%8B%E5%90%8E%E5%8F%98%E6%88%90%E4%BA%86%E5%AD%97%E7%AC%A6%E4%B8%B2&oq=var%2520obj%2520%253D%2520%257B%257D%253B&rsv_pq=ec9d6f200001157f&rsv_t=bbd2CJwpyWLaqOSlTgiJcZvCannCBgnlH0q%2FKjDoOoUnbPx5oU9S5mzIXH4&rqlang=cn&rsv_enter=1&inputT=8775&rsv_sug3=66&rsv_sug1=27&rsv_sug7=100&rsv_sug2=0&rsv_sug4=8775
-
-
-    // console.log(objOneDay)
-
-    // console.log(objOneDay[0])
-
-    // console.log(objOneDay[1])
-
-    // console.log(rowToDayList)
-
-    // rowToDayList.push({"title":kk,"rows":obj}); 
-
-  }
-
-  // var rowToDayList = objOneDay;  
-
-  // var rowToDayList = JSON.stringify(rowToDayList);  
-
-  console.log(rowToDayList)
-
-  console.log(typeof(rowToDayList)) //object
-
-
-
-
-
-  $ui.render({
-
-    views: [{
-      type: "list",
-      props: {
-        grouped: true,
-        rowHeight: 70, // 行高
-        header: {
-          type: "label",
-          props: {
-            height: 20,
-            text: "5月23日 星期一 这是测试",// headerDateTip,
-            textColor: $color("#AAAAAA"),
-            align: $align.center,
-            font: $font(14)
-          }
-        },
-
-        template: [
-          {
+          template: [{
             type: "label",
             props: {
               id: "isOver", // 进行中
@@ -225,7 +308,7 @@ function render(resp) {
           }, {
             type: "label",
             props: {
-              id: "title", // 队伍
+              id: "teams", // 队伍
               font: $font(20)
             },
             layout: function (make, view) {
@@ -236,32 +319,32 @@ function render(resp) {
               make.height.equalTo(24)
             }
           },
-          // {
-          //   type: "label",
-          //   props: {
-          //     id: "content",
-          //     textColor: $color("#888888"),
-          //     font: $font(15)
-          //   }, // 比赛时间 id content
-          //   layout: function (make, view) {
-          //     //make.left.right.equalTo(180);
-
-          //     make.top.equalTo(48)
-
-          //     make.centerX.equalTo(0) // 居中 
-          //     make.bottom.equalTo(-2)
-          //   }
-          // },
           {
             type: "label",
             props: {
-              id: "onewinscore",// 一队比分
+              id: "content",
               textColor: $color("#888888"),
-              font: $font(25)
+              font: $font(15)
+            }, // 比赛时间 id content
+            layout: function (make, view) {
+              //make.left.right.equalTo(180);
+
+              make.top.equalTo(48)
+
+              make.centerX.equalTo(0) // 居中 
+              make.bottom.equalTo(-2)
+            }
+          },
+          {
+            type: "label",
+            props: {
+              id: "onewinscore", // 一队比分
+              textColor: $color("#888888"),
+              font: $font(20)
             },
             layout: function (make) {
               // make.left.inset(28)
-              make.right.equalTo($("title").centerX).offset(-110) //距离队伍的偏移量
+              make.right.equalTo($("teams").centerX).offset(-110) //距离队伍的偏移量
               make.top.inset(10)
               make.height.equalTo(40)
             }
@@ -270,45 +353,112 @@ function render(resp) {
           {
             type: "label",
             props: {
-              id: "twowinscore",// 二队比分
+              id: "twowinscore", // 二队比分
               textColor: $color("#888888"),
-              font: $font(25)
+              font: $font(20)
             },
             layout: function (make) {
               //make.right.equalTo(40)
               // make.right.inset(28)
-              make.left.equalTo($("title").centerX).offset(110) //距离队伍的偏移量
+              make.left.equalTo($("teams").centerX).offset(110) //距离队伍的偏移量
               make.top.inset(10)
               make.height.equalTo(40)
             }
           }
-        ],
-        data: [{
-          rows: rowToDayList
-        }]
+          ],
+          data: rowToDayList
+
+        },
+        layout: function (make, view) {
+          make.left.right.equalTo(0);
+          make.top.equalTo(0);
+          make.height.equalTo(view.super);
+          make.bottom.equalTo(100);
+        },
+        events: {
+          didSelect: function (tableView, indexPath) {
+            var row = indexPath.row; // 目前这里不对
+            console.log(row)
+            var section = indexPath.section;
+            console.log(section)
+            var gidUrl = rowToDayList[section].rows[row].gidUrl;
+            console.log(gidUrl)
+
+            switch (gametype) {
+              case "nba":
+                var detailUrl = "https://m.hupu.com/" + gametype + "/game/recap_" + gidUrl + ".html"
+                break;
+              case "chlg":
+                var detailUrl = "https://m.hupu.com/soccer/games/event/" + gidUrl   // stats,event,recap,preview
+                break;
+
+            }
+
+            $ui.push({
+              props: {
+                title: rowToDayList[section].rows[row].teams.text
+              },
+              views: [{
+                type: "web",
+                props: {
+                  url: detailUrl
+                },
+                layout: $layout.fill,
+              }]
+            })
+
+          }
+        }
       },
-      layout: function (make, view) {
-        make.left.right.equalTo(0);
-        make.top.equalTo(0);
-        make.height.equalTo(view.super);
-        make.bottom.equalTo(100);
-      },
-      events: {
-        didSelect: function (tableView, indexPath) {
-          var row = indexPath.row;
-          //var scheduleid = rowToDayList[row].scheduleid.text;
-          //console.log(scheduleid)
-          // $app.openBrowser({
-          //   type: 10000,
-          //   url: "http://www.wanplus.com/schedule/" + scheduleid + ".html"
-          // })
+      {
+        type: "button",
+        props: {
+          title: "筛选比赛"
+        },
+        layout: function (make, view) {
+          // make.right.equalTo(-30);
+          make.bottom.equalTo(0);
+          make.height.equalTo(40);
+          // make.width.equalTo(view.super)
+          make.left.right.inset(-10);
+        },
+        events: {
+          tapped: function (sender) {
+            $pick.data({
+              props: {
+                items: [
+                  ["NBA", "欧冠"]   //nba,chlg
+                ]
+              },
+              handler: function (data) {
+                console.log(data[0])
+                var chosenItem = data[0];
+                switch (chosenItem) {
+                  case "NBA":
+                  getDatabyGametype("nba") 
+                    break;
+                  case "欧冠":
+                  getDatabyGametype("chlg") 
+                    break;
+                 
+                }
+              }
+            })
+          }
         }
       }
+
+      ]
+    })
+    if (gameDataArr.list == false) {
+      return $ui.toast("无数据");
     }
 
-    ]
-  })
-  if (gameDataArr.list == false) {
-    return $ui.toast("无数据");
+    var scrollSection = arrDayForScrollLocation_section[0] - 1;
+    $("listid").scrollTo({
+      indexPath: $indexPath(scrollSection, 0),
+      animated: true // 默认为 true
+    })
+
   }
 }
