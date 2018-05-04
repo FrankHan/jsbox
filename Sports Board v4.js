@@ -113,7 +113,21 @@ function getDatabyGametype(gametype) {
           obj.twowinscore.text = toDayList[i].away_score.toString();
 
           obj.gidUrl = toDayList[i].gid.toString();
-          obj.isOver.text = toDayList[i].process;
+
+          switch (gametype) {
+            case "nba":
+              obj.isOver.text = toDayList[i].process;
+              break;
+            case "chlg":
+              obj.isOver.text = toDayList[i].status.desc;
+              break;
+
+            case "使命召唤OL":
+              getGameDataRender(8)
+              break;
+          }
+
+
           obj.content.text = toDayList[i].match_type;
 
           //obj.content.text = toDayList[i].type_block;
@@ -236,10 +250,19 @@ function getDatabyGametype(gametype) {
             console.log(row)
             var section = indexPath.section;
             console.log(section)
-            //var scheduleid = rowToDayList(section,row).gidUrl;
-
             var gidUrl = rowToDayList[section].rows[row].gidUrl;
             console.log(gidUrl)
+
+            switch (gametype) {
+              case "nba":
+                var detailUrl = "https://m.hupu.com/" + gametype + "/game/recap_" + gidUrl + ".html"
+                break;
+              case "chlg":
+                var detailUrl = "https://m.hupu.com/soccer/games/event/" + gidUrl   // stats,event,recap,preview
+                break;
+
+            }
+
             $ui.push({
               props: {
                 title: rowToDayList[section].rows[row].teams.text
@@ -247,12 +270,49 @@ function getDatabyGametype(gametype) {
               views: [{
                 type: "web",
                 props: {
-                  url: "https://m.hupu.com/" + gametype + "/game/recap_" + gidUrl + ".html"
+                  url: detailUrl
                 },
                 layout: $layout.fill,
               }]
             })
 
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          title: "筛选比赛"
+        },
+        layout: function (make, view) {
+          // make.right.equalTo(-30);
+          make.bottom.equalTo(0);
+          make.height.equalTo(40);
+          // make.width.equalTo(view.super)
+          make.left.right.inset(-10);
+        },
+        events: {
+          tapped: function (sender) {
+            $pick.data({
+              props: {
+                items: [
+                  ["NBA", "欧冠"]   //nba,chlg
+                ]
+              },
+              handler: function (data) {
+                console.log(data[0])
+                var chosenItem = data[0];
+                switch (chosenItem) {
+                  case "NBA":
+                  getDatabyGametype("nba") 
+                    break;
+                  case "欧冠":
+                  getDatabyGametype("chlg") 
+                    break;
+                 
+                }
+              }
+            })
           }
         }
       }
