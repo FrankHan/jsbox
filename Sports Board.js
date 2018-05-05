@@ -1,20 +1,21 @@
 /**
- * @Version 2.4
+ * @Version 2.5
  * @author QvQ
- * @date 2018.5.4
+ * @date 2018.5.5
  * @brief 
- *   1. 当滚动时将出现"定位到今天"按钮，滚动结束后将自动隐藏
- *   2. 筛选比赛中增加了"赞赏"，欢迎姿磁一下 ^_^
+ *   1.更正：滚动结束后将不再隐藏"定位到今天"按钮
+ *   2. （一开始隐藏这个按钮是觉得有点挡住比分，不过隐藏就起不到作用了，特此更正）
  * @/brief
  */
 
+// 感谢Ablecats和Fndroid的帮助，特此致谢
 
 // $app.tips("点击比赛即可查看详情");
 
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.4
+let appVersion = 2.5
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 // 初始时获取nba比赛
@@ -339,12 +340,12 @@ function getDatabyGametype(gametype) {
             // $ui.toast("滚动了")
             $("moveToToday").hidden = false // 显示按钮
           },
-          willEndDragging: function(sender, velocity) {
-            $delay(1.5, function () { // 滚动结束1s后隐藏
-              $("moveToToday").hidden = true // 隐藏按钮
-            })
+          // willEndDragging: function (sender, velocity) {
+          //   $delay(5, function () { // 滚动结束1s后隐藏
+          //     $("moveToToday").hidden = true // 隐藏按钮
+          //   })
 
-          }
+          // }
         }
       },
       {
@@ -421,7 +422,7 @@ function getDatabyGametype(gametype) {
                         type: 10000,
                         url: "https://qr.alipay.com/FKX02085MATAXX5Z5CCE8F"
                       })
-                    })                   
+                    })
                     break;
 
                 }
