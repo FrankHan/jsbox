@@ -1,10 +1,10 @@
 /**
- * @Version 2.3
+ * @Version 2.4
  * @author QvQ
  * @date 2018.5.4
  * @brief 
- *   1. 未开始的比赛不显示比分
- *   2. 加入了西甲德甲英超等比赛
+ *   1. 当滚动时将出现"定位到今天"按钮，滚动结束后将自动隐藏
+ *   2. 筛选比赛中增加了"赞赏"，欢迎姿磁一下 ^_^
  * @/brief
  */
 
@@ -14,7 +14,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.3
+let appVersion = 2.4
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 // 初始时获取nba比赛
@@ -300,6 +300,8 @@ function getDatabyGametype(gametype) {
           make.bottom.equalTo(100);
         },
         events: {
+
+
           didSelect: function (tableView, indexPath) {
             var row = indexPath.row; // 目前这里不对
             console.log(row)
@@ -332,12 +334,50 @@ function getDatabyGametype(gametype) {
             })
 
           }
+          ,
+          willBeginDragging: function (sender) { // 滚动时，出现一个按钮定位到今天
+            // $ui.toast("滚动了")
+            $("moveToToday").hidden = false // 显示按钮
+          },
+          willEndDragging: function(sender, velocity) {
+            $delay(1.5, function () { // 滚动结束1s后隐藏
+              $("moveToToday").hidden = true // 隐藏按钮
+            })
+
+          }
         }
       },
       {
         type: "button",
         props: {
-          title: "筛选比赛"
+          title: "今天",
+          id: "moveToToday",
+          hidden: true
+        },
+        layout: function (make, view) {
+          // make.right.equalTo(-30);
+          make.bottom.equalTo(-80);
+          make.height.equalTo(40);
+          make.width.equalTo(60)
+          make.right.inset(10);
+        },
+        events: {
+          tapped: function (sender) {
+            var scrollSection = arrDayForScrollLocation_section[0];
+            $("listid").scrollTo({ // 滚动到今天
+              indexPath: $indexPath(scrollSection, 0),
+              animated: true // 默认为 true
+            })
+            $("moveToToday").hidden = true // 隐藏按钮
+
+          }
+        }
+      },
+      {
+        type: "button",
+        props: {
+          title: "筛选比赛",
+          id: "chooseItem"
         },
         layout: function (make, view) {
           // make.right.equalTo(-30);
@@ -351,7 +391,7 @@ function getDatabyGametype(gametype) {
             $pick.data({
               props: {
                 items: [
-                  ["NBA", "欧冠", "西甲", "英超", "德甲"]   //nba,chlg
+                  ["NBA", "欧冠", "西甲", "英超", "德甲", "赞赏"]   //nba,chlg
                 ]
               },
               handler: function (data) {
@@ -373,6 +413,16 @@ function getDatabyGametype(gametype) {
                   case "德甲":
                     getDatabyGametype("bund")
                     break;
+                  case "赞赏":
+                    // $ui.toast("感谢赞赏")
+                    $ui.toast("感谢赞赏,1s后将跳转支付宝...")
+                    $delay(1, function () { // 滚动结束3s后隐藏
+                      $app.openBrowser({
+                        type: 10000,
+                        url: "https://qr.alipay.com/FKX02085MATAXX5Z5CCE8F"
+                      })
+                    })                   
+                    break;
 
                 }
               }
@@ -387,11 +437,16 @@ function getDatabyGametype(gametype) {
       return $ui.toast("无数据");
     }
 
+    // 初始时，定位到今天
     var scrollSection = arrDayForScrollLocation_section[0] - 1;
     $("listid").scrollTo({
       indexPath: $indexPath(scrollSection, 0),
       animated: true // 默认为 true
     })
+    $("moveToToday").hidden = true //隐藏按钮
+
+
+
 
   }
 }
