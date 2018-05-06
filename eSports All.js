@@ -1,10 +1,10 @@
 /**
- * @Version 1.8
+ * @Version 1.9
  * @author QvQ
  * @date 2018.5.1
  * @brief 
- *   1. 需要更新时：将先展示比分，后自动更新，减少等待
- *   2. 更新提示使用toast，不遮挡主界面
+ *   1. 启动时自动显示上次所筛选的比赛类型，方便某一比赛的爱好者持续关注
+ *   2. 筛选比赛中添加了赞赏功能，欢迎资磁一下~
  * @/brief
  */
 
@@ -16,12 +16,21 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 1.8
+let appVersion = 1.9
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 
-// 初始时获取全部比赛
-getGameDataRender(0)
+// 初始时获取上次筛选的比赛
+
+let lastChosen_eSport = $cache.get("lastChosen_eSport")
+if (lastChosen_eSport == undefined) { //上次没有筛选
+  getGameDataRender(0)//获取全部比赛
+  return true
+} else {
+  getGameDataRender(lastChosen_eSport)//获取上次的比赛
+}
+
+// getGameDataRender(0)
 
 
 
@@ -64,7 +73,7 @@ function getGameDataRender(gameIndex) {
       if (data.data.isShowList == 0) {
         $ui.toast("本周无该比赛")
       }
-      
+
 
       var scheduleList = data.data.scheduleList;
       for (var k in scheduleList) {
@@ -414,7 +423,7 @@ function render(resp, dateIndex) {
           $pick.data({
             props: {
               items: [
-                ["所有比赛", "LOL", "Dota2", "守望先锋", "csgo", "KPL", "使命召唤OL"]   //0:All ,1:Dota2 , 2:lol, 4: csgo, 5: OWL, 6:KPL, 8: 使命召唤OL冠军联赛
+                ["所有比赛", "LOL", "Dota2", "守望先锋", "csgo", "KPL", "使命召唤OL", "赞赏"]   //0:All ,1:Dota2 , 2:lol, 4: csgo, 5: OWL, 6:KPL, 8: 使命召唤OL冠军联赛
               ]
             },
             handler: function (data) {
@@ -423,24 +432,41 @@ function render(resp, dateIndex) {
               switch (chosenItem) {
                 case "所有比赛":
                   getGameDataRender(0)
+                  $cache.set("lastChosen_eSport",0)
                   break;
                 case "LOL":
                   getGameDataRender(2)
+                  $cache.set("lastChosen_eSport",2)
                   break;
                 case "Dota2":
                   getGameDataRender(1)
+                  $cache.set("lastChosen_eSport",1)
                   break;
                 case "守望先锋":
                   getGameDataRender(5)
+                  $cache.set("lastChosen_eSport",5)
                   break;
                 case "csgo":
                   getGameDataRender(4)
+                  $cache.set("lastChosen_eSport",4)
                   break;
                 case "KPL":
                   getGameDataRender(6)
+                  $cache.set("lastChosen_eSport",6)
                   break;
                 case "使命召唤OL":
                   getGameDataRender(8)
+                  $cache.set("lastChosen_eSport",8)
+                  break;
+                case "赞赏":
+                  // $ui.toast("感谢赞赏")
+                  $ui.toast("感谢支持，即将跳转支付宝...")
+                  $delay(1, function () { // 滚动结束3s后隐藏
+                    $app.openBrowser({
+                      type: 10000,
+                      url: "https://qr.alipay.com/FKX02085MATAXX5Z5CCE8F"
+                    })
+                  })
                   break;
               }
             }
