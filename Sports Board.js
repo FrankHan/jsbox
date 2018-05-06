@@ -1,10 +1,11 @@
 /**
- * @Version 2.6
+ * @Version 2.7
  * @author QvQ
  * @date 2018.5.5
  * @brief 
- *   1. 赛事提醒：在某一比赛左滑可以添加日历提醒(在比赛开始时提醒)
- *   2. 增加了意甲、中超、中甲足协杯、亚冠的比赛
+ *   1. 启动时将显示上次选择的比赛类型，方便持续关注
+ *   2. 在某一比赛左滑可以添加日历提醒(在比赛开始时提醒)
+ *   3. 增加了意甲、中超、中甲足协杯、亚冠
  * @/brief
  */
 
@@ -15,7 +16,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.6
+let appVersion = 2.7
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 // 初始时获取上次筛选的比赛
