@@ -1,10 +1,10 @@
 /**
- * @Version 2.5
+ * @Version 2.6
  * @author QvQ
  * @date 2018.5.5
  * @brief 
- *   1.更正：滚动结束后将不再隐藏"定位到今天"按钮
- *   2. （一开始隐藏这个按钮是觉得有点挡住比分，不过隐藏就起不到作用了，特此更正）
+ *   1. 赛事提醒：在某一比赛左滑可以添加日历提醒(在比赛开始时提醒)
+ *   2. 增加了意甲、中超、中甲足协杯、亚冠的比赛
  * @/brief
  */
 
@@ -15,18 +15,32 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.5
+let appVersion = 2.6
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
-// 初始时获取nba比赛
-getDatabyGametype("nba")
+// 初始时获取上次筛选的比赛
+let lastChoice_Sport = $cache.get("lastChoice_Sport")
+if (lastChoice_Sport == undefined) { //上次没有筛选
+  getDatabyGametype("nba") //获取nba
+  return true
+} else {
+  getDatabyGametype(lastChoice_Sport)//获取上次的比赛
+}
+
 
 
 function getDatabyGametype(gametype) {
 
+  var httpUrl = "https://games.mobileapi.hupu.com/3/7.1.18/" + gametype + "/getGames?time_zone=Asia%2FShanghai&direc=next&client=cbf23a9fe5297e062f92690a7ed26af3c6647078&night=0&crt=1525160359&advId=68388FF5-D314-42F2-9B5B-B66FC782C857&clientId=35294508&sign=1801bb7c73ba11266d2db1ec1bbb37db&preload=0"
+
+
+  if (gametype == "csl1" || gametype == "csl2" || gametype == "csl3") {//中国足球的比赛：csl
+    var httpUrl = "https://games.mobileapi.hupu.com/3/7.1.18/" + "csl" + "/getGames?time_zone=Asia%2FShanghai&direc=next&client=cbf23a9fe5297e062f92690a7ed26af3c6647078&night=0&crt=1525160359&advId=68388FF5-D314-42F2-9B5B-B66FC782C857&clientId=35294508&sign=1801bb7c73ba11266d2db1ec1bbb37db&preload=0"
+  }
+
   var resp = []
   $http.get({
-    url: "https://games.mobileapi.hupu.com/3/7.1.18/" + gametype + "/getGames?time_zone=Asia%2FShanghai&direc=next&client=cbf23a9fe5297e062f92690a7ed26af3c6647078&night=0&crt=1525160359&advId=68388FF5-D314-42F2-9B5B-B66FC782C857&clientId=35294508&sign=1801bb7c73ba11266d2db1ec1bbb37db&preload=0",
+    url: httpUrl,
     header: {
       "Accept-Encoding": "gzip",
       "Connection": "keep-alive",
@@ -80,15 +94,15 @@ function getDatabyGametype(gametype) {
     for (var kk = 0; kk < gameDataArr.length; kk++) { //games[0],games[1]就是不同天
 
       var toDayList = gameDataArr[kk].data; //当天比赛数据
-      var dayForScrollLocation = gameDataArr[kk].day;
+      // var dayForScrollLocation = gameDataArr[kk].day;//20180507
 
-      var dayForScrollLocation_section = kk;
+      // var dayForScrollLocation_section = kk;
 
-      if (dayForScrollLocation >= currentDate) {
+      // if (dayForScrollLocation >= currentDate) {
 
-        arrDayForScrollLocation_section.push(dayForScrollLocation_section)
+      //   arrDayForScrollLocation_section.push(dayForScrollLocation_section)
 
-      }
+      // }
 
       var dateblockForSectionTitle = gamesList[kk].date_block;
 
@@ -115,7 +129,7 @@ function getDatabyGametype(gametype) {
         //obj.oneicon = {}; //一队图标
         //obj.twoicon = {}; //二队图标
 
-        if (toDayList[i].home_name == "精彩瞬间" || toDayList[i].home_name == "疯狂竞猜" || toDayList[i].away_name == "路人王" || toDayList[i].home_name == "虎扑") {
+        if (toDayList[i].home_name == "精彩瞬间" || toDayList[i].home_name == "疯狂竞猜" || toDayList[i].away_name == "路人王" || toDayList[i].home_name == "虎扑" || toDayList[i].away_name == "抽签仪式") {
 
           // console.log("非比赛，无关的")
 
@@ -123,10 +137,11 @@ function getDatabyGametype(gametype) {
           obj.teams.text = toDayList[i].home_name + " : " + toDayList[i].away_name;
           obj.onewinscore.text = toDayList[i].home_score.toString();
           obj.twowinscore.text = toDayList[i].away_score.toString();
+          obj.matchdateInFinalData = gameDataArr[kk].day;//20180507
 
           // 未开始的比赛去除比分
-          var matchTime = toDayList[i].begin_time;
-          if (matchTime > nowTimestamp / 1000) {//还没开始的比赛
+          obj.matchTime = toDayList[i].begin_time;
+          if (obj.matchTime > nowTimestamp / 1000) {//还没开始的比赛
             obj.onewinscore.text = "";
             obj.twowinscore.text = "";
           }
@@ -152,7 +167,7 @@ function getDatabyGametype(gametype) {
               }
 
               break;
-            case "chlg": case "liga": case "epl": case "bund":
+            case "chlg": case "liga": case "epl": case "bund": case "csl1": case "csl2": case "csl3": case "seri":
               obj.isOver.text = toDayList[i].status.desc;// + toDayList[i].stadium_name_en; //球场
               obj.content.text = toDayList[i].type_block;
               break;
@@ -160,15 +175,84 @@ function getDatabyGametype(gametype) {
 
           }
 
-          objOneDay_Rows.push(obj); //
+
+          var matchtypeTemp = toDayList[i].type_block;
+          var matchtypeTemp = matchtypeTemp.substr(0, 2);
+          // console.log(matchtypeTemp)
+
+
+
+          // 这一段：问题：造成定位到今天有问题
+          switch (gametype) {
+            case "csl1"://为中超，不push中甲、亚冠、足协比赛
+              if (matchtypeTemp == "中甲" || matchtypeTemp == "足协" || matchtypeTemp == "亚冠") {
+                //不push
+              } else {
+                objOneDay_Rows.push(obj);
+              }
+              break;
+            case "csl2"://为亚冠
+              if (matchtypeTemp == "中超" || matchtypeTemp == "足协" || matchtypeTemp == "中甲") {
+                //不push
+              } else {
+                objOneDay_Rows.push(obj);
+              }
+              break;
+            case "csl3"://为中甲 足协
+              if (matchtypeTemp == "中超" || matchtypeTemp == "亚冠") {
+                //不push
+              } else {
+                objOneDay_Rows.push(obj);
+              }
+              break;
+            default:
+              objOneDay_Rows.push(obj); //不是csl的比赛可以直接push
+              break;
+
+          }
+
+
+
+
         }
 
       }
-      rowToDayList.push(elementOneDay); //
+
+
+
+
+      if (elementOneDay.rows.length == 0) {//这个section里无数据
+        // console.log("空的")
+      } else { //这个section里有数据
+        rowToDayList.push(elementOneDay); //
+      }
+
+
+
 
     }
 
-    // console.log(rowToDayList) //可以用于显示拼接完成的data，用于传给list显示
+    console.log(rowToDayList) //可以用于显示拼接完成的data，用于传给list显示
+
+
+    // 滚动到今天  （2），使用 rowToDayList 数据
+    // console.log(currentDate)
+    var arrDayForScrollLocation_section = []
+    for (var kk = 0; kk < rowToDayList.length; kk++) {
+      var dayForScrollLocation = rowToDayList[kk].rows[0].matchdateInFinalData;//20180507
+
+      // console.log(dayForScrollLocation)
+
+      var dayForScrollLocation_section = kk;
+
+      if (dayForScrollLocation >= currentDate) {
+        console.log(dayForScrollLocation_section)
+
+        arrDayForScrollLocation_section.push(dayForScrollLocation_section)
+
+      }
+    }
+
 
     // list所显示的header
     switch (gametype) {
@@ -193,6 +277,56 @@ function getDatabyGametype(gametype) {
           id: "listid",
           grouped: true,
           rowHeight: 73, // 行高
+          actions: [
+            {
+              title: "设置提醒",
+              handler: function (sender, indexPath) {//单击"设置提醒"时触发
+
+                var row = indexPath.row;
+                // console.log(row) // 所选row
+                var section = indexPath.section;
+                // console.log(section)
+                var teamsForCalender = rowToDayList[section].rows[row].teams.text;
+                // console.log(teamsForCalender)
+                var matchtypeForCalender = rowToDayList[section].rows[row].content.text
+                // console.log(matchtypeForCalender)
+                var matchTimeForCalender = rowToDayList[section].rows[row].matchTime;
+                // console.log(matchTimeForCalender)
+
+                var nowTimestamp = new Date().getTime();
+                if (matchTimeForCalender > nowTimestamp / 1000) {//是还没开始的比赛
+                  $calendar.create({//创建新日历
+                    title: teamsForCalender + " (" + matchtypeForCalender + ")",
+                    startDate: matchTimeForCalender * 1000,
+                    hours: 1,
+                    notes: "来自JSBox: Sports Board",
+                    alarmDate: new Date()+3600,//事件发生时提醒
+                    handler: function (resp) {
+                      // console.log(resp)
+                      if (resp.status == 1) { //设置成功
+                        $ui.toast("日历提醒设置成功")
+                      }
+                      if (resp.status != 1) {
+                        console.log("设置失败，请检查权限")
+                        $ui.toast("设置失败，请检查权限")
+                      }
+                    }
+                  })
+                } else {
+                  $ui.toast("比赛已结束，不能设置提醒")
+                }
+
+
+
+              }
+            }
+            // {
+            //   title: "share",
+            //   handler: function(sender, indexPath) {
+
+            //   }
+            // }
+          ],
           header: {
             type: "label",
             props: {
@@ -304,19 +438,22 @@ function getDatabyGametype(gametype) {
 
 
           didSelect: function (tableView, indexPath) {
-            var row = indexPath.row; // 目前这里不对
-            console.log(row)
+            var row = indexPath.row;
+            // console.log(row) // 所选row
             var section = indexPath.section;
-            console.log(section)
+            // console.log(section)
             var gidUrl = rowToDayList[section].rows[row].gidUrl;
-            console.log(gidUrl)
+            // console.log(gidUrl)
 
             switch (gametype) {
               case "nba":
                 var detailUrl = "https://m.hupu.com/" + gametype + "/game/recap_" + gidUrl + ".html"
                 break;
-              case "chlg": case "liga": case "epl": case "bund":
+              case "chlg": case "liga": case "epl": case "bund": case "seri": case "csl1": case "csl2":
                 var detailUrl = "https://m.hupu.com/soccer/games/event/" + gidUrl   // stats,event,recap,preview
+                break;
+              case "csl3":
+                $ui.toast("该比赛类型没有详情数据")
                 break;
 
             }
@@ -392,7 +529,7 @@ function getDatabyGametype(gametype) {
             $pick.data({
               props: {
                 items: [
-                  ["NBA", "欧冠", "西甲", "英超", "德甲", "赞赏"]   //nba,chlg
+                  ["NBA", "欧冠", "西甲", "英超", "德甲", "意甲", "中超", "亚冠", "中甲 足协杯", "赞赏"]   //nba,chlg
                 ]
               },
               handler: function (data) {
@@ -401,22 +538,43 @@ function getDatabyGametype(gametype) {
                 switch (chosenItem) {
                   case "NBA":
                     getDatabyGametype("nba")
+                    $cache.set("lastChoice_Sport", "nba")
                     break;
                   case "欧冠":
                     getDatabyGametype("chlg")
+                    $cache.set("lastChoice_Sport", "chlg")
                     break;
                   case "西甲":
                     getDatabyGametype("liga")
+                    $cache.set("lastChoice_Sport", "liga")
                     break;
                   case "英超":
                     getDatabyGametype("epl")
+                    $cache.set("lastChoice_Sport", "epl")
                     break;
                   case "德甲":
                     getDatabyGametype("bund")
+                    $cache.set("lastChoice_Sport", "bund")
+                    break;
+                  case "意甲":
+                    getDatabyGametype("seri")
+                    $cache.set("lastChoice_Sport", "seri")
+                    break;
+                  case "中超":
+                    getDatabyGametype("csl1")
+                    $cache.set("lastChoice_Sport", "csl1")
+                    break;
+                  case "亚冠":
+                    getDatabyGametype("csl2")
+                    $cache.set("lastChoice_Sport", "csl2")
+                    break;
+                  case "中甲 足协杯":
+                    getDatabyGametype("csl3")
+                    $cache.set("lastChoice_Sport", "csl3")
                     break;
                   case "赞赏":
                     // $ui.toast("感谢赞赏")
-                    $ui.toast("感谢赞赏,1s后将跳转支付宝...")
+                    $ui.toast("感谢支持，即将跳转支付宝...")
                     $delay(1, function () { // 滚动结束3s后隐藏
                       $app.openBrowser({
                         type: 10000,
@@ -439,12 +597,20 @@ function getDatabyGametype(gametype) {
     }
 
     // 初始时，定位到今天
-    var scrollSection = arrDayForScrollLocation_section[0] - 1;
+    // console.log(arrDayForScrollLocation_section)
+    if (arrDayForScrollLocation_section[0] <= 0) { //0-1为负数
+      var scrollSection = arrDayForScrollLocation_section[0];
+    } else {
+      var scrollSection = arrDayForScrollLocation_section[0] - 1;
+    }
     $("listid").scrollTo({
       indexPath: $indexPath(scrollSection, 0),
       animated: true // 默认为 true
     })
     $("moveToToday").hidden = true //隐藏按钮
+
+
+
 
 
 
