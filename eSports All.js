@@ -1,10 +1,10 @@
 /**
- * @Version 2.0
+ * @Version 2.1
  * @author QvQ
- * @date 2018.5.1
+ * @date 2018.5.7
  * @brief 
- *   1. 修复了错误：当选择一个本周没有的比赛时无法打开脚本
- *   2. 筛选比赛中添加了赞赏功能，欢迎资磁一下~
+ *   1. 没有比赛时显示更为统一
+ *   2. 日历提醒功能：在某一场比赛左滑可以设置日历提醒（在比赛开始时提醒）
  * @/brief
  */
 
@@ -16,7 +16,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.0
+let appVersion = 2.1
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 
@@ -69,14 +69,7 @@ function getGameDataRender(gameIndex) {
       // ---定位到今天并render
       var data = resp.data
 
-      //console.log(data)
-
-      if (data.data.isShowList == 0) {
-        $ui.toast("本周无该比赛")
-        $cache.set("lastChosen_eSport",0) //不然下次再启动就打开不了
-        $cache.set("eSportsAll_AppNavTitle", "全部比赛")
-        getGameDataRender(0)
-      }
+      // console.log(data)
 
 
       var scheduleList = data.data.scheduleList;
@@ -87,7 +80,7 @@ function getGameDataRender(gameIndex) {
         }
       }
 
-      //console.log("todayDateStore: "+todayDateStore)
+      // console.log("todayDateStore: " + todayDateStore) //dota2有值
 
       var timeArr = [] //取时间值
       var timeDataArr = []; //数据值
@@ -112,15 +105,23 @@ function getGameDataRender(gameIndex) {
       }
       // ---过滤器end
 
-      //console.log(timeTArr)
+      // console.log(timeTArr)
 
-      for (var i = 0; i < timeTArr.length; i++) {
-        if (timeTArr[i] >= todayDateStore) {
-          //console.log("定位到天index： "+i); //定位到最近一天
-          render(resp, i);
-          break;
+      if (timeTArr.length == 0) {//7天里都没有这个比赛
+        render(resp, 0);
+
+      } else {//7天里有比赛 可以显示
+        for (var i = 0; i < timeTArr.length; i++) {
+          // console.log("执行了")
+          if (timeTArr[i] >= todayDateStore) {
+            //console.log("定位到天index： "+i); //定位到最近一天
+            render(resp, i);
+            break;
+          }
         }
       }
+
+
       // ---定位到今天并render  end
 
     }
@@ -130,113 +131,194 @@ function getGameDataRender(gameIndex) {
 
 // Less Main program
 function render(resp, dateIndex) {
-  var data = resp.data
+  var data = resp.data // 仍然是http得到的数据
+  // console.log("http data:")
 
-  //  console.log(data)
+  // console.log(data)
   var prevdate = data.data.prevdate; //上周时间
   var nextdate = data.data.nextdate; //下周时间
-  var timeArr = [];//取时间值
-  var timeForHeader = [];// 显示在menu
-  var timeDataArr = []; //数据值
-  var rowsData = []; //列表信息
-  var scheduleList = data.data.scheduleList;
-  for (var key in scheduleList) {
-    timeArr.push(key);
-    timeForHeader.push(scheduleList[key].week);  // lDate,date,week,filterdate
-    //console.log(key)  //打印日期
-    timeDataArr.push(scheduleList[key]);
-  }
 
 
-  // ---无比赛过滤器
-  var timeTArr = [];
-  var timeTDataArr = [];
-  var timeForHeaderT = [];
-  for (var i = 0; i < timeDataArr.length; i++) {
-    if (timeDataArr[i].list != false) {
-      timeTArr.push(timeArr[i]);
-      timeForHeaderT.push(timeForHeader[i]);
-      timeTDataArr.push(timeDataArr[i]);
+
+  // console.log(prevdate) //有值
+
+  if (data.data.isShowList == 0) {//本周七天都没有该比赛，直接构造一个 rowToDayList
+    // console.log("本周七天都没有该比赛")
+    var timeForHeaderT = ["本周"];
+    var headerDateTip = "本周无该比赛"; //头部日期提示
+
+    // var rowToDayList = [//可以用
+    //   {
+    //     "onewinscore": {
+    //       "text": ""
+    //     },
+    //     "content": {
+    //       "text": "" //"本周无该比赛"
+    //     },
+    //     "twowinscore": {
+    //       "text": ""
+    //     },
+    //     "isOver": {
+    //       "text": "" //"已结束"
+    //     },
+    //     "scheduleid": {
+    //       "text": "" //"41226"
+    //     },
+    //     "title": {
+    //       "text": "本周无该比赛"
+    //     },
+    //     "gamename": {},
+    //     "twoicon": {
+    //       "src": "https://static.wanplus.com/data/ow/team/5098_mid.png"
+    //     },
+    //     "oneicon": {
+    //       "src": "https://static.wanplus.com/data/ow/team/5103_mid.png"
+    //     }
+    //   }
+    // ]
+
+    var rowToDayList = []
+
+
+  } else { //本周七天有该比赛，可以显示
+    var timeArr = [];//取时间值
+    var timeForHeader = [];// 显示在menu
+    var timeDataArr = []; //数据值
+    var rowsData = []; //列表信息
+    var scheduleList = data.data.scheduleList;
+    for (var key in scheduleList) {
+      timeArr.push(key);
+      timeForHeader.push(scheduleList[key].week);  // lDate,date,week,filterdate
+      // console.log(key)  //打印日期
+      timeDataArr.push(scheduleList[key]);
     }
-  }
-  // ---过滤器end
 
 
-  // console.log(timeArr)
-  var toDayData = timeTDataArr[dateIndex]; //当天数据 
-  var headerDateTip = toDayData.lDate; //头部日期提示
+    // ---无比赛过滤器
+    var timeTArr = [];
+    var timeTDataArr = [];
+    var timeForHeaderT = [];
+    for (var i = 0; i < timeDataArr.length; i++) {
+      if (timeDataArr[i].list != false) {
+        timeTArr.push(timeArr[i]);
+        timeForHeaderT.push(timeForHeader[i]);
+        timeTDataArr.push(timeDataArr[i]);
+      }
+    }
+    // ---过滤器end
 
-  var selectedDayTimeStamp = toDayData.time; //当天的时间戳，为当天00:00
-  //console.log(selectedDayTimeStamp)
-  var realtime = new Date()
-  var realtimeStamp = realtime.getTime();//realtime
-  //console.log(realtimeStamp / 1000)
-  var realtimeHour = realtime.getHours();//获取当前时间小时数值0~23 
-  var realtimeMinute = realtime.getMinutes()
 
-  //console.log(headerDateTip)
+    // console.log(timeArr)
+    var toDayData = timeTDataArr[dateIndex]; //当天数据 
+    var headerDateTip = toDayData.lDate; //头部日期提示
 
-  var toDayList = toDayData.list; //当天比赛数据
-  // console.log(toDayList);
-  var rowToDayList = []; //每行比赛数据
-  for (var i = 0; i < toDayList.length; i++) {
-    var obj = {};
-    obj.title = {};
-    obj.content = {};
-    obj.gamename = {};
-    obj.onewinscore = {};
-    obj.twowinscore = {};
-    obj.scheduleid = {};
-    obj.isOver = {};//是否正在进行中
-    obj.oneicon = {}; //一队图标
-    obj.twoicon = {}; //二队图标
 
-    obj.oneicon.src = toDayList[i].oneicon;
-    obj.twoicon.src = toDayList[i].twoicon;
-    obj.onewinscore.text = toDayList[i].onewin.toString();
-    obj.twowinscore.text = toDayList[i].twowin.toString();
 
-    if (toDayList[i].isover == false) {
-      if (realtimeStamp / 1000 >= selectedDayTimeStamp) {//选中了今天
+    var selectedDayTimeStamp = toDayData.time; //当天的时间戳，为当天00:00
+    //console.log(selectedDayTimeStamp)
+    var realtime = new Date()
+    var realtimeStamp = realtime.getTime();//realtime
+    //console.log(realtimeStamp / 1000)
+    var realtimeHour = realtime.getHours();//获取当前时间小时数值0~23 
+    var realtimeMinute = realtime.getMinutes()
 
-        // 获取当前比赛的时间
-        var currentCompeStarttime = toDayList[i].starttime
-        var currentCompeStartHour = currentCompeStarttime.split(":")[0];
-        var currentCompeStartMinute = currentCompeStarttime.split(":")[1];
-        //console.log(currentCompeStartHour + " " + currentCompeStartMinute)
-        if (realtimeHour >= currentCompeStartHour && realtimeMinute >= currentCompeStartMinute) { //当天进行中的
-          obj.isOver.text = "进行中"
-          var isOverVar = "进行中"
-        } else {// 当天还没开始
-          obj.isOver.text = "未开始"
+    //console.log(headerDateTip)
+
+    var toDayList = toDayData.list; //当天比赛数据
+    // console.log(toDayList);
+    var rowToDayList = []; //每行比赛数据
+
+
+
+    for (var i = 0; i < toDayList.length; i++) {
+      var obj = {};
+      obj.title = {};
+      obj.content = {};
+      obj.gamename = {};
+      obj.onewinscore = {};
+      obj.twowinscore = {};
+      obj.scheduleid = {};
+      obj.isOver = {};//是否正在进行中
+      obj.oneicon = {}; //一队图标
+      obj.twoicon = {}; //二队图标
+
+      obj.oneicon.src = toDayList[i].oneicon;
+      obj.twoicon.src = toDayList[i].twoicon;
+      obj.onewinscore.text = toDayList[i].onewin.toString();
+      obj.twowinscore.text = toDayList[i].twowin.toString();
+
+      if (toDayList[i].isover == false) {
+        if (realtimeStamp / 1000 >= selectedDayTimeStamp) {//选中了今天
+
+          // 获取当前比赛的时间
+          var currentCompeStarttime = toDayList[i].starttime
+          var currentCompeStartHour = currentCompeStarttime.split(":")[0];
+          var currentCompeStartMinute = currentCompeStarttime.split(":")[1];
+          //console.log(currentCompeStartHour + " " + currentCompeStartMinute)
+          if (realtimeHour >= currentCompeStartHour && realtimeMinute >= currentCompeStartMinute) { //当天进行中的
+            obj.isOver.text = "进行中"
+            var isOverVar = "进行中"
+          } else {// 当天还没开始
+            obj.isOver.text = "未开始"
+            var isOverVar = "未开始"
+            obj.onewinscore.text = "";
+            obj.twowinscore.text = "";
+          }
+        } else {
+          obj.isOver.text = "未开始"//后面天
           var isOverVar = "未开始"
           obj.onewinscore.text = "";
           obj.twowinscore.text = "";
         }
       } else {
-        obj.isOver.text = "未开始"//后面天
-        var isOverVar = "未开始"
-        obj.onewinscore.text = "";
-        obj.twowinscore.text = "";
+        var isOverVar = "已结束"//已结束的比赛
+        obj.isOver.text = "已结束"
       }
-    } else {
-      var isOverVar = "已结束"//已结束的比赛
-      obj.isOver.text = "已结束"
+      obj.title.text = toDayList[i].oneseedname + " : " + toDayList[i].twoseedname;
+      obj.content.text = toDayList[i].ename + " " + toDayList[i].starttime //+ " " + isOverVar;
+      obj.scheduleid.text = toDayList[i].scheduleid;
+
+      // 下面获取比赛开始的unix时间
+      var Date_temp = toDayList[i].relation.toString();
+
+      var Date_temp2 = Date_temp.substring(0, 4) + "-" + Date_temp.substring(4, 6) + "-" + Date_temp.substring(6, 8)
+      // console.log(Date_temp)
+      var hourminute = toDayList[i].starttime;
+      var hourminuteSecond = hourminute + ":00"
+      var Date_temp3 = Date_temp2 + " " + hourminuteSecond;
+      // console.log(Date_temp3)
+      //下面转换为unix时间
+      var str = Date_temp3;
+      str = str.replace(/-/g, "/");
+      var date = new Date(str);
+      var humanDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()));
+      obj.matchTime = humanDate.getTime() / 1000 - 8 * 60 * 60; //转换为了unix时间
+
+
+
+
+
+      rowToDayList.push(obj);
     }
-    obj.title.text = toDayList[i].oneseedname + " : " + toDayList[i].twoseedname;
-    obj.content.text = toDayList[i].ename + " " + toDayList[i].starttime //+ " " + isOverVar;
-    obj.scheduleid.text = toDayList[i].scheduleid;
-    rowToDayList.push(obj);
   }
 
 
-   // app导航栏文字
-   let appNavTitle = $cache.get("eSportsAll_AppNavTitle")
-   if (appNavTitle == undefined) { //上次没有筛选
-     let appNavTitle = "eSports All"
-   }
 
+
+
+  // app导航栏文字
+  let appNavTitle = $cache.get("eSportsAll_AppNavTitle")
+  if (appNavTitle == undefined) { //上次没有筛选
+    let appNavTitle = "eSports All"
+  }
+
+
+  // console.log("rowToDayList:"); //拼接完成用于list显示
   // console.log(rowToDayList);
+
+
+
+
   $ui.render({
     props: {
       id: "uiRender1",
@@ -266,62 +348,64 @@ function render(resp, dateIndex) {
       props: {
         grouped: true,
         rowHeight: 70, // 行高
-        // actions: [
-        //   {
-        //     title: "设置提醒",
-        //     handler: function (sender, indexPath) {//单击"设置提醒"时触发
+        actions: [
+          {
+            title: "设置提醒",
+            handler: function (sender, indexPath) {//单击"设置提醒"时触发
 
-        //       var row = indexPath.row;
-        //       // console.log(row) // 所选row
-        //       var section = indexPath.section;
-        //       // console.log(section)
-        //       var teamsForCalender = rowToDayList[section].rows[row].title.text;
-        //       // console.log(teamsForCalender)
-        //       var matchtypeForCalender = rowToDayList[section].rows[row].content.text //要改的
-        //       // console.log(matchtypeForCalender)
-        //       var matchTimeForCalender = rowToDayList[section].rows[row].matchTime;
-        //       // console.log(matchTimeForCalender)
+              // console.log(indexPath)
 
-              
-        //       //当前插件名
-        //       // console.log(encodeURI(currentName()))
-        //       var calendarUrl = encodeURI("jsbox://run?name=" + currentName())
-              
-        //       var nowTimestamp = new Date().getTime();
-        //       if (matchTimeForCalender > nowTimestamp / 1000) {//是还没开始的比赛
-        //         $calendar.create({//创建新日历
-        //           title: teamsForCalender + " (" + matchtypeForCalender + ")",
-        //           startDate: matchTimeForCalender * 1000,
-        //           hours: 1,
-        //           url: encodeURI(calendarUrl),//需要两次encodeURI
-        //           notes: "来自JSBox: Sports Board",
-        //           alarmDate: new Date() + 3600,//事件发生时提醒
-        //           handler: function (resp) {
-        //             // console.log(resp)
-        //             if (resp.status == 1) { //设置成功
-        //               $ui.toast("日历提醒设置成功")
-        //             }
-        //             if (resp.status != 1) {
-        //               console.log("设置失败，请检查权限")
-        //               $ui.toast("设置失败，请检查权限")
-        //             }
-        //           }
-        //         })
-        //       } else {
-        //         $ui.toast("比赛已结束，不能设置提醒")
-        //       }
+              var row = indexPath.row;
+              // console.log(row) // 所选row
+              // var section = indexPath.section;
+              // console.log(section)
+              var teamsForCalender = rowToDayList[row].title.text;
+              // console.log(teamsForCalender)
+              var matchtypeForCalender = rowToDayList[row].content.text //要改的
+              // console.log(matchtypeForCalender)
+              var matchTimeForCalender = rowToDayList[row].matchTime;
+              // console.log(matchTimeForCalender)
 
 
+              //当前插件名
+              // console.log(encodeURI(currentName()))
+              var calendarUrl = encodeURI("jsbox://run?name=" + currentName())
 
-        //     }
-        //   }
-        //   // {
-        //   //   title: "share",
-        //   //   handler: function(sender, indexPath) {
+              var nowTimestamp = new Date().getTime();
+              if (matchTimeForCalender > nowTimestamp / 1000) {//是还没开始的比赛
+                $calendar.create({//创建新日历
+                  title: teamsForCalender + " (" + matchtypeForCalender + ")",
+                  startDate: matchTimeForCalender * 1000,
+                  hours: 1,
+                  url: encodeURI(calendarUrl),//需要两次encodeURI
+                  notes: "来自JSBox: eSports All",
+                  alarmDate: new Date() + 3600,//事件发生时提醒
+                  handler: function (resp) {
+                    // console.log(resp)
+                    if (resp.status == 1) { //设置成功
+                      $ui.toast("日历提醒设置成功")
+                    }
+                    if (resp.status != 1) {
+                      console.log("设置失败，请检查权限")
+                      $ui.toast("设置失败，请检查权限")
+                    }
+                  }
+                })
+              } else {
+                $ui.toast("比赛已结束，不能设置提醒")
+              }
 
-        //   //   }
-        //   // }
-        // ],
+
+
+            }
+          }
+          // {
+          //   title: "share",
+          //   handler: function(sender, indexPath) {
+
+          //   }
+          // }
+        ],
         header: {
           type: "label",
           props: {
@@ -459,7 +543,7 @@ function render(resp, dateIndex) {
         didSelect: function (tableView, indexPath) {
           var row = indexPath.row;
           var scheduleid = rowToDayList[row].scheduleid.text;
-          console.log(scheduleid)
+          // console.log(scheduleid)
 
           $ui.push({
             props: {
@@ -504,37 +588,37 @@ function render(resp, dateIndex) {
               switch (chosenItem) {
                 case "所有比赛":
                   getGameDataRender(0)
-                  $cache.set("lastChosen_eSport",0)
+                  $cache.set("lastChosen_eSport", 0)
                   $cache.set("eSportsAll_AppNavTitle", "全部比赛")
                   break;
                 case "LOL":
                   getGameDataRender(2)
-                  $cache.set("lastChosen_eSport",2)
+                  $cache.set("lastChosen_eSport", 2)
                   $cache.set("eSportsAll_AppNavTitle", "LOL赛程")
                   break;
                 case "Dota2":
                   getGameDataRender(1)
-                  $cache.set("lastChosen_eSport",1)
+                  $cache.set("lastChosen_eSport", 1)
                   $cache.set("eSportsAll_AppNavTitle", "Dota2赛程")
                   break;
                 case "守望先锋":
                   getGameDataRender(5)
-                  $cache.set("lastChosen_eSport",5)
+                  $cache.set("lastChosen_eSport", 5)
                   $cache.set("eSportsAll_AppNavTitle", "守望先锋")
                   break;
                 case "csgo":
                   getGameDataRender(4)
-                  $cache.set("lastChosen_eSport",4)
+                  $cache.set("lastChosen_eSport", 4)
                   $cache.set("eSportsAll_AppNavTitle", "CS:GO赛程")
                   break;
                 case "KPL":
                   getGameDataRender(6)
-                  $cache.set("lastChosen_eSport",6)
+                  $cache.set("lastChosen_eSport", 6)
                   $cache.set("eSportsAll_AppNavTitle", "KPL联赛")
                   break;
                 case "使命召唤OL":
                   getGameDataRender(8)
-                  $cache.set("lastChosen_eSport",8)
+                  $cache.set("lastChosen_eSport", 8)
                   $cache.set("eSportsAll_AppNavTitle", "使命召唤OL")
                   break;
                 case "赞赏":
