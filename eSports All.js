@@ -1,9 +1,9 @@
 /**
- * @Version 1.9
+ * @Version 2.0
  * @author QvQ
  * @date 2018.5.1
  * @brief 
- *   1. 启动时自动显示上次所筛选的比赛类型，方便某一比赛的爱好者持续关注
+ *   1. 修复了错误：当选择一个本周没有的比赛时无法打开脚本
  *   2. 筛选比赛中添加了赞赏功能，欢迎资磁一下~
  * @/brief
  */
@@ -16,7 +16,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 1.9
+let appVersion = 2.0
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 
@@ -63,6 +63,7 @@ function getGameDataRender(gameIndex) {
     },
     handler: function (resp) {
       resp = resp;
+      $ui.loading(false);//切换比赛成功，隐藏加载中按钮
 
 
       // ---定位到今天并render
@@ -72,6 +73,9 @@ function getGameDataRender(gameIndex) {
 
       if (data.data.isShowList == 0) {
         $ui.toast("本周无该比赛")
+        $cache.set("lastChosen_eSport",0) //不然下次再启动就打开不了
+        $cache.set("eSportsAll_AppNavTitle", "全部比赛")
+        getGameDataRender(0)
       }
 
 
@@ -225,8 +229,19 @@ function render(resp, dateIndex) {
     rowToDayList.push(obj);
   }
 
+
+   // app导航栏文字
+   let appNavTitle = $cache.get("eSportsAll_AppNavTitle")
+   if (appNavTitle == undefined) { //上次没有筛选
+     let appNavTitle = "eSports All"
+   }
+
   // console.log(rowToDayList);
   $ui.render({
+    props: {
+      id: "uiRender1",
+      title: appNavTitle//App导航栏文字
+    },
     views: [{
       type: "menu",
       props: {
@@ -251,6 +266,62 @@ function render(resp, dateIndex) {
       props: {
         grouped: true,
         rowHeight: 70, // 行高
+        // actions: [
+        //   {
+        //     title: "设置提醒",
+        //     handler: function (sender, indexPath) {//单击"设置提醒"时触发
+
+        //       var row = indexPath.row;
+        //       // console.log(row) // 所选row
+        //       var section = indexPath.section;
+        //       // console.log(section)
+        //       var teamsForCalender = rowToDayList[section].rows[row].title.text;
+        //       // console.log(teamsForCalender)
+        //       var matchtypeForCalender = rowToDayList[section].rows[row].content.text //要改的
+        //       // console.log(matchtypeForCalender)
+        //       var matchTimeForCalender = rowToDayList[section].rows[row].matchTime;
+        //       // console.log(matchTimeForCalender)
+
+              
+        //       //当前插件名
+        //       // console.log(encodeURI(currentName()))
+        //       var calendarUrl = encodeURI("jsbox://run?name=" + currentName())
+              
+        //       var nowTimestamp = new Date().getTime();
+        //       if (matchTimeForCalender > nowTimestamp / 1000) {//是还没开始的比赛
+        //         $calendar.create({//创建新日历
+        //           title: teamsForCalender + " (" + matchtypeForCalender + ")",
+        //           startDate: matchTimeForCalender * 1000,
+        //           hours: 1,
+        //           url: encodeURI(calendarUrl),//需要两次encodeURI
+        //           notes: "来自JSBox: Sports Board",
+        //           alarmDate: new Date() + 3600,//事件发生时提醒
+        //           handler: function (resp) {
+        //             // console.log(resp)
+        //             if (resp.status == 1) { //设置成功
+        //               $ui.toast("日历提醒设置成功")
+        //             }
+        //             if (resp.status != 1) {
+        //               console.log("设置失败，请检查权限")
+        //               $ui.toast("设置失败，请检查权限")
+        //             }
+        //           }
+        //         })
+        //       } else {
+        //         $ui.toast("比赛已结束，不能设置提醒")
+        //       }
+
+
+
+        //     }
+        //   }
+        //   // {
+        //   //   title: "share",
+        //   //   handler: function(sender, indexPath) {
+
+        //   //   }
+        //   // }
+        // ],
         header: {
           type: "label",
           props: {
@@ -428,35 +499,43 @@ function render(resp, dateIndex) {
             },
             handler: function (data) {
               console.log(data[0])
+              $ui.loading(true);//切换比赛，显示加载中按钮
               var chosenItem = data[0];
               switch (chosenItem) {
                 case "所有比赛":
                   getGameDataRender(0)
                   $cache.set("lastChosen_eSport",0)
+                  $cache.set("eSportsAll_AppNavTitle", "全部比赛")
                   break;
                 case "LOL":
                   getGameDataRender(2)
                   $cache.set("lastChosen_eSport",2)
+                  $cache.set("eSportsAll_AppNavTitle", "LOL赛程")
                   break;
                 case "Dota2":
                   getGameDataRender(1)
                   $cache.set("lastChosen_eSport",1)
+                  $cache.set("eSportsAll_AppNavTitle", "Dota2赛程")
                   break;
                 case "守望先锋":
                   getGameDataRender(5)
                   $cache.set("lastChosen_eSport",5)
+                  $cache.set("eSportsAll_AppNavTitle", "守望先锋")
                   break;
                 case "csgo":
                   getGameDataRender(4)
                   $cache.set("lastChosen_eSport",4)
+                  $cache.set("eSportsAll_AppNavTitle", "CS:GO赛程")
                   break;
                 case "KPL":
                   getGameDataRender(6)
                   $cache.set("lastChosen_eSport",6)
+                  $cache.set("eSportsAll_AppNavTitle", "KPL联赛")
                   break;
                 case "使命召唤OL":
                   getGameDataRender(8)
                   $cache.set("lastChosen_eSport",8)
+                  $cache.set("eSportsAll_AppNavTitle", "使命召唤OL")
                   break;
                 case "赞赏":
                   // $ui.toast("感谢赞赏")
