@@ -1,11 +1,10 @@
 /**
- * @Version 2.7
+ * @Version 2.8
  * @author QvQ
- * @date 2018.5.5
+ * @date 2018.5.7
  * @brief 
- *   1. 启动时将显示上次选择的比赛类型，方便持续关注
- *   2. 在某一比赛左滑可以添加日历提醒(在比赛开始时提醒)
- *   3. 增加了意甲、中超、中甲足协杯、亚冠
+ *   1. 顶部导航栏显示当前所选赛事
+ *   2. 生成的日历提醒中添加URL，可以快速跳转至此脚本
  * @/brief
  */
 
@@ -16,7 +15,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.7
+let appVersion = 2.8
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 // 初始时获取上次筛选的比赛
@@ -51,6 +50,8 @@ function getDatabyGametype(gametype) {
       "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_3 like Mac OS X) AppleWebKit/603.3.8 (KHTML, like Gecko) Mobile/14G60 isp/460.02 network/WIFI prokanqiu/7.1.18.55 iPhone8,4"
     },
     handler: function (resp) {
+
+      $ui.loading(false);//切换比赛成功，隐藏加载中按钮
 
       render(resp)
 
@@ -233,7 +234,7 @@ function getDatabyGametype(gametype) {
 
     }
 
-    console.log(rowToDayList) //可以用于显示拼接完成的data，用于传给list显示
+    // console.log(rowToDayList) //可以用于显示拼接完成的data，用于传给list显示
 
 
     // 滚动到今天  （2），使用 rowToDayList 数据
@@ -247,7 +248,7 @@ function getDatabyGametype(gametype) {
       var dayForScrollLocation_section = kk;
 
       if (dayForScrollLocation >= currentDate) {
-        console.log(dayForScrollLocation_section)
+        // console.log(dayForScrollLocation_section)
 
         arrDayForScrollLocation_section.push(dayForScrollLocation_section)
 
@@ -269,8 +270,18 @@ function getDatabyGametype(gametype) {
     }
 
 
+    // app导航栏文字
+    let appNavTitle = $cache.get("SportsBoard_AppNavTitle")
+    if (appNavTitle == undefined) { //上次没有筛选
+      let appNavTitle = "Sports Board"
+    }
+
 
     $ui.render({
+      props: {
+        id: "uiRender1",
+        title: appNavTitle + "赛程板"//App导航栏文字
+      },
 
       views: [{
         type: "list",
@@ -294,14 +305,20 @@ function getDatabyGametype(gametype) {
                 var matchTimeForCalender = rowToDayList[section].rows[row].matchTime;
                 // console.log(matchTimeForCalender)
 
+                
+                //当前插件名
+                // console.log(encodeURI(currentName()))
+                var calendarUrl = encodeURI("jsbox://run?name=" + currentName())
+                
                 var nowTimestamp = new Date().getTime();
                 if (matchTimeForCalender > nowTimestamp / 1000) {//是还没开始的比赛
                   $calendar.create({//创建新日历
                     title: teamsForCalender + " (" + matchtypeForCalender + ")",
                     startDate: matchTimeForCalender * 1000,
                     hours: 1,
+                    url: encodeURI(calendarUrl),//需要两次encodeURI
                     notes: "来自JSBox: Sports Board",
-                    alarmDate: new Date()+3600,//事件发生时提醒
+                    alarmDate: new Date() + 3600,//事件发生时提醒
                     handler: function (resp) {
                       // console.log(resp)
                       if (resp.status == 1) { //设置成功
@@ -328,16 +345,16 @@ function getDatabyGametype(gametype) {
             //   }
             // }
           ],
-          header: {
-            type: "label",
-            props: {
-              height: 0,
-              text: headerDisplay, // header,
-              textColor: $color("#AAAAAA"),
-              align: $align.center,
-              font: $font(14)
-            }
-          },
+          // header: {//显示在列表顶部
+          //   type: "label",
+          //   props: {
+          //     height: 0,
+          //     text: headerDisplay, // header,
+          //     textColor: $color("#AAAAAA"),
+          //     align: $align.center,
+          //     font: $font(14)
+          //   }
+          // },
           footer: {
             type: "label",
             props: {
@@ -534,44 +551,54 @@ function getDatabyGametype(gametype) {
                 ]
               },
               handler: function (data) {
-                console.log(data[0])
+                // console.log(data[0])
                 var chosenItem = data[0];
+                $ui.loading(true);//切换比赛，显示加载中按钮
                 switch (chosenItem) {
                   case "NBA":
                     getDatabyGametype("nba")
                     $cache.set("lastChoice_Sport", "nba")
+                    $cache.set("SportsBoard_AppNavTitle", "NBA")
                     break;
                   case "欧冠":
                     getDatabyGametype("chlg")
                     $cache.set("lastChoice_Sport", "chlg")
+                    $cache.set("SportsBoard_AppNavTitle", "欧冠")
                     break;
                   case "西甲":
                     getDatabyGametype("liga")
                     $cache.set("lastChoice_Sport", "liga")
+                    $cache.set("SportsBoard_AppNavTitle", "西甲")
                     break;
                   case "英超":
                     getDatabyGametype("epl")
                     $cache.set("lastChoice_Sport", "epl")
+                    $cache.set("SportsBoard_AppNavTitle", "英超")
                     break;
                   case "德甲":
                     getDatabyGametype("bund")
                     $cache.set("lastChoice_Sport", "bund")
+                    $cache.set("SportsBoard_AppNavTitle", "德甲")
                     break;
                   case "意甲":
                     getDatabyGametype("seri")
                     $cache.set("lastChoice_Sport", "seri")
+                    $cache.set("SportsBoard_AppNavTitle", "意甲")
                     break;
                   case "中超":
                     getDatabyGametype("csl1")
                     $cache.set("lastChoice_Sport", "csl1")
+                    $cache.set("SportsBoard_AppNavTitle", "中超")
                     break;
                   case "亚冠":
                     getDatabyGametype("csl2")
                     $cache.set("lastChoice_Sport", "csl2")
+                    $cache.set("SportsBoard_AppNavTitle", "亚冠")
                     break;
                   case "中甲 足协杯":
                     getDatabyGametype("csl3")
                     $cache.set("lastChoice_Sport", "csl3")
+                    $cache.set("SportsBoard_AppNavTitle", "中甲&足协杯")
                     break;
                   case "赞赏":
                     // $ui.toast("感谢赞赏")
@@ -667,7 +694,7 @@ function needUpdate(nv, lv) {
 //升级插件
 function updateAddin() {
   let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=" + currentName() + "&icon=" + currentIcon())  //这里可以改icon，是否只在主程序运行等
-  // let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=Sports%20Board&icon=icon_039.png&types=1")  //这里可以改icon，是否只在主程序运行等
+  // let url2i = encodeURI("jsbox://install?url=" + addinURL + "&name=Sports Board&icon=icon_039.png&types=1")  //这里可以改icon，是否只在主程序运行等
   $app.openURL(url2i)
 }
 
