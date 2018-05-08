@@ -1,9 +1,9 @@
 /**
- * @Version 2.9
+ * @Version 3.0
  * @author QvQ
  * @date 2018.5.7
  * @brief 
- *   1. 增加了世界杯的比赛
+ *   1. 继续屏蔽非比赛的信息（如每日复盘等节目）
  * @/brief
  */
 
@@ -14,7 +14,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.9
+let appVersion = 3.0
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 // 初始时获取上次筛选的比赛
@@ -130,7 +130,7 @@ function getDatabyGametype(gametype) {
         //obj.oneicon = {}; //一队图标
         //obj.twoicon = {}; //二队图标
 
-        if (toDayList[i].home_name == "精彩瞬间" || toDayList[i].home_name == "疯狂竞猜" || toDayList[i].away_name == "路人王" || toDayList[i].home_name == "虎扑" || toDayList[i].away_name == "抽签仪式") {
+        if (toDayList[i].home_name == "精彩瞬间" || toDayList[i].home_name == "疯狂竞猜" || toDayList[i].away_name == "路人王" || toDayList[i].home_name == "虎扑" || toDayList[i].home_name == "每日复盘" || toDayList[i].away_name == "抽签仪式") {
 
           // console.log("非比赛，无关的")
 
@@ -168,7 +168,7 @@ function getDatabyGametype(gametype) {
               }
 
               break;
-            case "chlg": case "liga": case "epl": case "bund": case "csl1": case "csl2": case "csl3": case "seri":  case "worldcup":  
+            case "chlg": case "liga": case "epl": case "bund": case "csl1": case "csl2": case "csl3": case "seri": case "worldcup":
               obj.isOver.text = toDayList[i].status.desc;// + toDayList[i].stadium_name_en; //球场
               obj.content.text = toDayList[i].type_block;
               break;
@@ -466,7 +466,7 @@ function getDatabyGametype(gametype) {
               case "nba":
                 var detailUrl = "https://m.hupu.com/" + gametype + "/game/recap_" + gidUrl + ".html"
                 break;
-              case "chlg": case "liga": case "epl": case "bund": case "seri": case "csl1": case "csl2": case "worldcup":  
+              case "chlg": case "liga": case "epl": case "bund": case "seri": case "csl1": case "csl2": case "worldcup":
                 var detailUrl = "https://m.hupu.com/soccer/games/event/" + gidUrl   // stats,event,recap,preview
                 break;
               case "csl3":
@@ -621,6 +621,7 @@ function getDatabyGametype(gametype) {
           }
         }
       }
+    
 
       ]
     })
