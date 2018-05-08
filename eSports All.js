@@ -1,10 +1,9 @@
 /**
- * @Version 2.1
+ * @Version 2.2
  * @author QvQ
  * @date 2018.5.7
  * @brief 
- *   1. 没有比赛时显示更为统一
- *   2. 日历提醒功能：在某一场比赛左滑可以设置日历提醒（在比赛开始时提醒）
+ *   1. 现在可以查看上周和下周的比赛
  * @/brief
  */
 
@@ -16,28 +15,32 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.1
+let appVersion = 2.2
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 
 // 初始时获取上次筛选的比赛
+$cache.set("isThisWeek",true)
 
 let lastChosen_eSport = $cache.get("lastChosen_eSport")
 if (lastChosen_eSport == undefined) { //上次没有筛选
-  getGameDataRender(0)//获取全部比赛
+  getGameDataRender(0, getUnixTimestamp())//获取全部比赛
   return true
 } else {
-  getGameDataRender(lastChosen_eSport)//获取上次的比赛
+  getGameDataRender(lastChosen_eSport, getUnixTimestamp())//获取上次的比赛
 }
 
 // getGameDataRender(0)
 
 
-
+// 获取unix时间戳，函数
+function getUnixTimestamp() {
+  return Math.round(new Date().getTime() / 1000)
+}
 
 
 // Main program
-function getGameDataRender(gameIndex) {
+function getGameDataRender(gameIndex, chosenTimePeriod) {
 
   var resp = []
   $http.post({
@@ -57,28 +60,36 @@ function getGameDataRender(gameIndex) {
       "X-CSRF-Token": "184373722"
     },
     body: {
-      _gtk: 184373722,
+      eids: "",
       game: gameIndex,// 0:All ,1:Dota2 , 2:lol, 4: csgo, 5: OWL, 6:KPL, 8: 使命召唤OL冠军联赛
-      eids: ""
+      time: chosenTimePeriod,//1525536000  chosenTimePeriod
+      _gtk: 184373722
     },
     handler: function (resp) {
-      resp = resp;
+      // console.log(resp)
+      // var resp = resp;
       $ui.loading(false);//切换比赛成功，隐藏加载中按钮
 
 
       // ---定位到今天并render
       var data = resp.data
 
+      // console.log("http data 1:")
+
       // console.log(data)
 
 
       var scheduleList = data.data.scheduleList;
-      for (var k in scheduleList) {
-        if (scheduleList[k].week == "今天") {
-          // console.log(k)
-          var todayDateStore = k
-        }
-      }
+
+
+      //获取todayDateStore
+      var nowDate = new Date();
+      var year = nowDate.getFullYear();
+      var month = nowDate.getMonth() + 1 < 10 ? "0" + (nowDate.getMonth() + 1)
+        : nowDate.getMonth() + 1;
+      var day = nowDate.getDate() < 10 ? "0" + nowDate.getDate() : nowDate
+        .getDate();
+      var todayDateStore = year + month + day;
 
       // console.log("todayDateStore: " + todayDateStore) //dota2有值
 
@@ -117,6 +128,9 @@ function getGameDataRender(gameIndex) {
             //console.log("定位到天index： "+i); //定位到最近一天
             render(resp, i);
             break;
+          } else { //上周时，没法到最近一天
+            render(resp, 0);
+            break;
           }
         }
       }
@@ -132,12 +146,16 @@ function getGameDataRender(gameIndex) {
 // Less Main program
 function render(resp, dateIndex) {
   var data = resp.data // 仍然是http得到的数据
-  // console.log("http data:")
+  // console.log("http data 2:")
 
   // console.log(data)
-  var prevdate = data.data.prevdate; //上周时间
-  var nextdate = data.data.nextdate; //下周时间
+  var prevdate = data.data.prevdate; //上周日期
+  var nextdate = data.data.nextdate; //下周日期
 
+  var prevtime = data.data.prevtime; //上周时间
+  var nexttime = data.data.nexttime; //下周时间
+  $cache.set("eSport_prevTimePeriod", prevtime)
+  $cache.set("eSport_nextTimePeriod", nexttime)
 
 
   // console.log(prevdate) //有值
@@ -225,7 +243,7 @@ function render(resp, dateIndex) {
     //console.log(headerDateTip)
 
     var toDayList = toDayData.list; //当天比赛数据
-    // console.log(toDayList);
+    // // console.log(toDayList);
     var rowToDayList = []; //每行比赛数据
 
 
@@ -241,6 +259,8 @@ function render(resp, dateIndex) {
       obj.isOver = {};//是否正在进行中
       obj.oneicon = {}; //一队图标
       obj.twoicon = {}; //二队图标
+
+
 
       obj.oneicon.src = toDayList[i].oneicon;
       obj.twoicon.src = toDayList[i].twoicon;
@@ -315,6 +335,10 @@ function render(resp, dateIndex) {
 
   // console.log("rowToDayList:"); //拼接完成用于list显示
   // console.log(rowToDayList);
+
+
+  let isThisWeek = $cache.get("isThisWeek")
+  // console.log("回到本周")
 
 
 
@@ -582,42 +606,42 @@ function render(resp, dateIndex) {
               ]
             },
             handler: function (data) {
-              console.log(data[0])
+              // console.log(data[0])
               $ui.loading(true);//切换比赛，显示加载中按钮
               var chosenItem = data[0];
               switch (chosenItem) {
                 case "所有比赛":
-                  getGameDataRender(0)
+                  getGameDataRender(0, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 0)
                   $cache.set("eSportsAll_AppNavTitle", "全部比赛")
                   break;
                 case "LOL":
-                  getGameDataRender(2)
+                  getGameDataRender(2, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 2)
                   $cache.set("eSportsAll_AppNavTitle", "LOL赛程")
                   break;
                 case "Dota2":
-                  getGameDataRender(1)
+                  getGameDataRender(1, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 1)
                   $cache.set("eSportsAll_AppNavTitle", "Dota2赛程")
                   break;
                 case "守望先锋":
-                  getGameDataRender(5)
+                  getGameDataRender(5, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 5)
                   $cache.set("eSportsAll_AppNavTitle", "守望先锋")
                   break;
                 case "csgo":
-                  getGameDataRender(4)
+                  getGameDataRender(4, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 4)
                   $cache.set("eSportsAll_AppNavTitle", "CS:GO赛程")
                   break;
                 case "KPL":
-                  getGameDataRender(6)
+                  getGameDataRender(6, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 6)
                   $cache.set("eSportsAll_AppNavTitle", "KPL联赛")
                   break;
                 case "使命召唤OL":
-                  getGameDataRender(8)
+                  getGameDataRender(8, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 8)
                   $cache.set("eSportsAll_AppNavTitle", "使命召唤OL")
                   break;
@@ -636,39 +660,111 @@ function render(resp, dateIndex) {
           })
         }
       }
+    },
+    {
+      type: "button",
+      props: {
+        title: "本周",
+        id: "moveToToday",
+        hidden: isThisWeek
+      },
+      layout: function (make, view) {
+        // make.right.equalTo(-30);
+        make.bottom.equalTo(-80);
+        make.height.equalTo(40);
+        make.width.equalTo(60)
+        make.right.inset(10);
+      },
+      events: {
+        tapped: function (sender) {
+          $cache.set("isThisWeek",true)
+
+
+          let lastChosen_eSport = $cache.get("lastChosen_eSport")
+          if (lastChosen_eSport == undefined) { //上次没有筛选
+            getGameDataRender(0, getUnixTimestamp())//获取全部比赛
+            return true
+          } else {
+            getGameDataRender(lastChosen_eSport, getUnixTimestamp())//获取上次的比赛
+          }
+
+
+          $("moveToToday").hidden = true // 隐藏按钮
+
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        title: "上周"// prevdate
+      },
+      layout: function (make, view) {
+        make.left.equalTo(2);
+        // make.bottom.equalTo(-20);
+        make.width.equalTo(60);
+        make.bottom.equalTo(0);
+        make.height.equalTo(40);
+      },
+      events: {
+        tapped: function (sender) {
+          // $ui.toast("上周")
+          $cache.set("isThisWeek",false)
+          let eSport_prevTimePeriod = $cache.get("eSport_prevTimePeriod")
+
+          // $cache.set("eSport_chosenTimePeriod", eSport_prevTimePeriod)
+
+          // 获取上周的比赛
+          let lastChosen_eSport = $cache.get("lastChosen_eSport")
+          if (lastChosen_eSport == undefined) { //上次没有筛选
+            getGameDataRender(0, eSport_prevTimePeriod)//获取全部比赛
+            return true
+          } else {
+            // console.log(eSport_prevTimePeriod)
+            // console.log(lastChosen_eSport)
+            getGameDataRender(lastChosen_eSport, eSport_prevTimePeriod)//获取上次的比赛
+          }
+
+
+        }
+      }
+    },
+    {
+      type: "button",
+      props: {
+        title: "下周"//nextdate
+      },
+      layout: function (make, view) {
+        make.right.equalTo(-15);
+        make.bottom.equalTo(0);
+        make.height.equalTo(40);
+      },
+      events: {
+        tapped: function (sender) {
+          // $ui.toast("下周")
+          $cache.set("isThisWeek",false)
+          $("moveToToday").hidden = false // 隐藏按钮
+
+          let eSport_nextTimePeriod = $cache.get("eSport_nextTimePeriod")
+
+          // $cache.set("eSport_chosenTimePeriod", eSport_nextTimePeriod)
+
+          // 获取下周的比赛
+          let lastChosen_eSport = $cache.get("lastChosen_eSport")
+          if (lastChosen_eSport == undefined) { //上次没有筛选
+            getGameDataRender(0, eSport_nextTimePeriod)//获取全部比赛
+            return true
+          } else {
+            // console.log(eSport_nextTimePeriod)
+            // console.log(lastChosen_eSport)
+            getGameDataRender(lastChosen_eSport, eSport_nextTimePeriod)//获取上次的比赛
+          }
+
+        }
+      }
     }
-      // {
-      //   type: "button",
-      //   props: {
-      //     title: prevdate
-      //   },
-      //   layout: function (make, view) {
-      //     make.left.equalTo(30);
-      //     make.bottom.equalTo(-20);
-      //     make.height.equalTo(40);
-      //   },
-      //   events: {
-      //     tapped: function (sender) {
-      //       $ui.toast("Tapped")
-      //     }
-      //   }
-      // },
-      // {
-      //   type: "button",
-      //   props: {
-      //     title: nextdate
-      //   },
-      //   layout: function (make, view) {
-      //     make.right.equalTo(-30);
-      //     make.bottom.equalTo(-20);
-      //     make.height.equalTo(40);
-      //   },
-      //   events: {
-      //     tapped: function (sender) {
-      //       $ui.toast("Tapped")
-      //     }
-      //   }
-      // }
+    
+
 
     ]
   })
