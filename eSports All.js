@@ -1,9 +1,10 @@
 /**
- * @Version 2.2
+ * @Version 2.3
  * @author QvQ
  * @date 2018.5.7
  * @brief 
- *   1. 现在可以查看上周和下周的比赛
+ *   1. 修复了本周不能定位到今天的错误
+ *   2. 现在可以查看上周和下周的比赛
  * @/brief
  */
 
@@ -15,7 +16,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.2
+let appVersion = 2.3
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 
@@ -130,7 +131,7 @@ function getGameDataRender(gameIndex, chosenTimePeriod) {
             break;
           } else { //上周时，没法到最近一天
             render(resp, 0);
-            break;
+            // break; //这回造成本周也无法定位到最近一天
           }
         }
       }
