@@ -1,10 +1,9 @@
 /**
- * @Version 2.8
+ * @Version 2.9
  * @author QvQ
  * @date 2018.5.7
  * @brief 
- *   1. 顶部导航栏显示当前所选赛事
- *   2. 生成的日历提醒中添加URL，可以快速跳转至此脚本
+ *   1. 增加了世界杯的比赛
  * @/brief
  */
 
@@ -15,7 +14,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.8
+let appVersion = 2.9
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 // 初始时获取上次筛选的比赛
@@ -169,7 +168,7 @@ function getDatabyGametype(gametype) {
               }
 
               break;
-            case "chlg": case "liga": case "epl": case "bund": case "csl1": case "csl2": case "csl3": case "seri":
+            case "chlg": case "liga": case "epl": case "bund": case "csl1": case "csl2": case "csl3": case "seri":  case "worldcup":  
               obj.isOver.text = toDayList[i].status.desc;// + toDayList[i].stadium_name_en; //球场
               obj.content.text = toDayList[i].type_block;
               break;
@@ -305,11 +304,11 @@ function getDatabyGametype(gametype) {
                 var matchTimeForCalender = rowToDayList[section].rows[row].matchTime;
                 // console.log(matchTimeForCalender)
 
-                
+
                 //当前插件名
                 // console.log(encodeURI(currentName()))
                 var calendarUrl = encodeURI("jsbox://run?name=" + currentName())
-                
+
                 var nowTimestamp = new Date().getTime();
                 if (matchTimeForCalender > nowTimestamp / 1000) {//是还没开始的比赛
                   $calendar.create({//创建新日历
@@ -467,7 +466,7 @@ function getDatabyGametype(gametype) {
               case "nba":
                 var detailUrl = "https://m.hupu.com/" + gametype + "/game/recap_" + gidUrl + ".html"
                 break;
-              case "chlg": case "liga": case "epl": case "bund": case "seri": case "csl1": case "csl2":
+              case "chlg": case "liga": case "epl": case "bund": case "seri": case "csl1": case "csl2": case "worldcup":  
                 var detailUrl = "https://m.hupu.com/soccer/games/event/" + gidUrl   // stats,event,recap,preview
                 break;
               case "csl3":
@@ -547,7 +546,7 @@ function getDatabyGametype(gametype) {
             $pick.data({
               props: {
                 items: [
-                  ["NBA", "欧冠", "西甲", "英超", "德甲", "意甲", "中超", "亚冠", "中甲 足协杯", "赞赏"]   //nba,chlg
+                  ["NBA", "欧冠", "世界杯", "西甲", "英超", "德甲", "意甲", "中超", "亚冠", "中甲 足协杯", "赞赏"]   //nba,chlg
                 ]
               },
               handler: function (data) {
@@ -569,6 +568,11 @@ function getDatabyGametype(gametype) {
                     getDatabyGametype("liga")
                     $cache.set("lastChoice_Sport", "liga")
                     $cache.set("SportsBoard_AppNavTitle", "西甲")
+                    break;
+                  case "世界杯":
+                    getDatabyGametype("worldcup")
+                    $cache.set("lastChoice_Sport", "worldcup")
+                    $cache.set("SportsBoard_AppNavTitle", "世界杯")
                     break;
                   case "英超":
                     getDatabyGametype("epl")
