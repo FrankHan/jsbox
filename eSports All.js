@@ -1,10 +1,9 @@
 /**
- * @Version 2.3
+ * @Version 2.4
  * @author QvQ
  * @date 2018.5.7
  * @brief 
- *   1. 修复了本周不能定位到今天的错误
- *   2. 现在可以查看上周和下周的比赛
+ *   1. 修复了一些显示小问题
  * @/brief
  */
 
@@ -16,7 +15,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.3
+let appVersion = 2.4
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 
@@ -615,41 +614,49 @@ function render(resp, dateIndex) {
                   getGameDataRender(0, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 0)
                   $cache.set("eSportsAll_AppNavTitle", "全部比赛")
+                  $cache.set("isThisWeek",true)
                   break;
                 case "LOL":
                   getGameDataRender(2, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 2)
                   $cache.set("eSportsAll_AppNavTitle", "LOL赛程")
+                  $cache.set("isThisWeek",true)
                   break;
                 case "Dota2":
                   getGameDataRender(1, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 1)
                   $cache.set("eSportsAll_AppNavTitle", "Dota2赛程")
+                  $cache.set("isThisWeek",true)
                   break;
                 case "守望先锋":
                   getGameDataRender(5, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 5)
                   $cache.set("eSportsAll_AppNavTitle", "守望先锋")
+                  $cache.set("isThisWeek",true)
                   break;
                 case "csgo":
                   getGameDataRender(4, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 4)
                   $cache.set("eSportsAll_AppNavTitle", "CS:GO赛程")
+                  $cache.set("isThisWeek",true)
                   break;
                 case "KPL":
                   getGameDataRender(6, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 6)
                   $cache.set("eSportsAll_AppNavTitle", "KPL联赛")
+                  $cache.set("isThisWeek",true)
                   break;
                 case "使命召唤OL":
                   getGameDataRender(8, getUnixTimestamp())
                   $cache.set("lastChosen_eSport", 8)
                   $cache.set("eSportsAll_AppNavTitle", "使命召唤OL")
+                  $cache.set("isThisWeek",true)
                   break;
                 case "赞赏":
                   // $ui.toast("感谢赞赏")
                   $ui.toast("感谢支持，即将跳转支付宝...")
                   $delay(1, function () { // 滚动结束3s后隐藏
+                    $ui.loading(false);//切换比赛，显示加载中按钮
                     $app.openBrowser({
                       type: 10000,
                       url: "https://qr.alipay.com/FKX02085MATAXX5Z5CCE8F"
