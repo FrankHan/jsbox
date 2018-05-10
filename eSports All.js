@@ -1,9 +1,9 @@
 /**
- * @Version 2.4
+ * @Version 2.5
  * @author QvQ
  * @date 2018.5.7
  * @brief 
- *   1. 修复了一些显示小问题
+ *   1. 修复显示：通过上周下周按钮切换至本周时，隐藏本周按钮
  * @/brief
  */
 
@@ -15,7 +15,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.4
+let appVersion = 2.5
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 
@@ -80,6 +80,8 @@ function getGameDataRender(gameIndex, chosenTimePeriod) {
 
 
       var scheduleList = data.data.scheduleList;
+
+      
 
 
       //获取todayDateStore
@@ -149,8 +151,20 @@ function render(resp, dateIndex) {
   // console.log("http data 2:")
 
   // console.log(data)
+
+
+
+  var scheduleList = data.data.scheduleList;
+  for (var k in scheduleList) {
+    if (scheduleList[k].week == "今天") {//是本周
+      $cache.set("isThisWeek", true)//隐藏本周按钮
+    }
+  }
+
   var prevdate = data.data.prevdate; //上周日期
   var nextdate = data.data.nextdate; //下周日期
+
+ 
 
   var prevtime = data.data.prevtime; //上周时间
   var nexttime = data.data.nexttime; //下周时间
