@@ -1,9 +1,9 @@
 /**
- * @Version 3.0
+ * @Version 3.1
  * @author QvQ
  * @date 2018.5.7
  * @brief 
- *   1. 继续屏蔽非比赛的信息（如每日复盘等节目）
+ *   1. 继续屏蔽非比赛的信息（如虎扑体育等节目）
  * @/brief
  */
 
@@ -14,7 +14,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 3.0
+let appVersion = 3.1
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/Sports%20Board.js"
 
 // 初始时获取上次筛选的比赛
@@ -130,7 +130,7 @@ function getDatabyGametype(gametype) {
         //obj.oneicon = {}; //一队图标
         //obj.twoicon = {}; //二队图标
 
-        if (toDayList[i].home_name == "精彩瞬间" || toDayList[i].home_name == "疯狂竞猜" || toDayList[i].away_name == "路人王" || toDayList[i].home_name == "虎扑" || toDayList[i].home_name == "每日复盘" || toDayList[i].away_name == "抽签仪式") {
+        if (toDayList[i].home_name == "精彩瞬间" || toDayList[i].home_name == "疯狂竞猜" || toDayList[i].away_name == "路人王" || toDayList[i].home_name == "虎扑" || toDayList[i].home_name == "每日复盘" || toDayList[i].away_name == "抽签仪式" || toDayList[i].away_name == "虎扑体育") {
 
           // console.log("非比赛，无关的")
 
