@@ -1,10 +1,10 @@
 /**
- * @Version 2.6
+ * @Version 2.7
  * @author QvQ
  * @date 2018.6.5
  * @brief 
  *   1. 修复了api
- *   2. 增加了绝地求生比赛
+ *   2. 其他优化
  * @/brief
  */
 
@@ -16,12 +16,10 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.6
+let appVersion = 2.7
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
-
-
-
+// 初始情况
 let lastChosen_eSport = $cache.get("lastChosen_eSport")
 if (lastChosen_eSport == undefined) { //上次没有筛选
   getGameDataRender("all")//获取全部比赛
@@ -29,7 +27,6 @@ if (lastChosen_eSport == undefined) { //上次没有筛选
 } else {
   getGameDataRender(lastChosen_eSport)//获取上次的比赛
 }
-
 
 
 // 获取unix时间戳，函数
@@ -74,10 +71,6 @@ function getGameDataRender(gameIndex) {
       break;
   }
 
-
-
-
-
   var resp = []
   $http.post({
     url: getUrl,
@@ -105,16 +98,11 @@ function getGameDataRender(gameIndex) {
 
       // console.log("请求到的全部数据：")
       // console.log(resp.data)
-
       $ui.loading(false);//切换比赛成功，隐藏加载中按钮
-
-
       // ---定位到今天并render
       var data = resp.data
 
       render(resp)
-
-
 
     }
   })
@@ -178,8 +166,8 @@ function render(resp) {
   var toDayList = data.data.schdList; //当天比赛数据
 
   // console.log(data)
-  console.log("请求到的数据：")
-  console.log(toDayList);
+  // console.log("请求到的数据：")
+  // console.log(toDayList);
   var rowToDayList = []; //每行比赛数据
 
   var sectionHeaderArr = []; //section header
@@ -281,8 +269,8 @@ function render(resp) {
   }
 
 
-  console.log("拼接之后：")
-  console.log(rowToDayList)
+  // console.log("拼接之后：")
+  // console.log(rowToDayList)
 
 
   // 滚动到今天
