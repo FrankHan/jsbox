@@ -1,9 +1,9 @@
 /**
- * @Version 2.8
+ * @Version 2.9
  * @author QvQ
  * @date 2018.6.5
  * @brief 
- *   1. 修复了比赛api
+ *   1. 修复了一个显示bug
  *   2. 其他优化
  * @/brief
  */
@@ -16,7 +16,7 @@
 "use strict"
 
 // ----版本自动更新
-let appVersion = 2.8
+let appVersion = 2.9
 let addinURL = "https://raw.githubusercontent.com/FrankHan/jsbox/master/eSports%20All.js"
 
 // 初始情况
@@ -29,7 +29,7 @@ if (lastChosen_eSport == undefined) { //上次没有筛选
 }
 
 
-// 获取unix时间戳，函数
+// 获取现在的unix时间戳，函数
 function getUnixTimestamp() {
   return Math.round(new Date().getTime() / 1000)
 }
@@ -38,6 +38,8 @@ function getUnixTimestamp() {
 // Main program
 // 先打开控制台，再进行同步可以看到console.log内容
 function getGameDataRender(gameIndex) {
+
+
 
   switch (gameIndex) {
     case "all"://全部比赛
@@ -49,7 +51,7 @@ function getGameDataRender(gameIndex) {
       var getUrl = "https://www.wanplus.com/api.php?_param=56bc03c3ebc4cfabd11110b66264070c%7Cios%7C200%7C4.1.3%7C26%7C1528208999%7C765757%7CnfV0trKja37maU3%2Bnzz9m7/OVKO1/iPCJcU23lTw4MGytYXrl/WBH3Q1hdw5Tvo%7C2&c=App_Event&eids=644,616,579,580,640,623,645,583,626,572,643,581,613,589,638,&m=schdListThrough&tflag=0&sig=0ad28d6889357b9ddd03516b560bcabf&c=App_Event&eids=644%2C616%2C579%2C580%2C640%2C623%2C645%2C583%2C626%2C572%2C643%2C581%2C613%2C589%2C638%2C&m=schdListThrough&tflag=0"
       break;
     case "dota2":
-      var getUrl = "https://www.wanplus.com/api.php?_param=56bc03c3ebc4cfabd11110b66264070c%7Cios%7C200%7C4.1.3%7C26%7C1528210522%7C765757%7CnfV0trKja37maU3%2Bnzz9m7/OVKO1/iPCJcU23lTw4MGytYXrl/WBH3Q1hdw5Tvo%7C2&c=App_Event&eids=590,622,625,612,596,621,598,624,604,600,&m=schdListThrough&tflag=0&sig=9736a3f73f435fe80737392aa407ccbc&c=App_Event&eids=590%2C622%2C625%2C612%2C596%2C621%2C598%2C624%2C604%2C600%2C&m=schdListThrough&tflag=0"
+      var getUrl = "https://www.wanplus.com/api.php?_param=56bc03c3ebc4cfabd11110b66264070c%7Cios%7C200%7C4.1.3%7C26%7C1528295081%7C765757%7CnfV0trKja37maU3%2Bnzz9m7/OVKO1/iPCJcU23lTw4MGytYXrl/WBH3Q1hdw5Tvo%7C1&c=App_Event&eids=590,622,612,625,596,621,624,598,604,600,&m=schdListThrough&tflag=0&sig=c7d443f3bcd5baebfe2784d577f63997&c=App_Event&eids=590%2C622%2C612%2C625%2C596%2C621%2C624%2C598%2C604%2C600%2C&m=schdListThrough&tflag=0"
       break;
     case "csgo":
       var getUrl = "https://www.wanplus.com/api.php?_param=56bc03c3ebc4cfabd11110b66264070c%7Cios%7C200%7C4.1.3%7C26%7C1528212025%7C765757%7CnfV0trKja37maU3%2Bnzz9m7/OVKO1/iPCJcU23lTw4MGytYXrl/WBH3Q1hdw5Tvo%7C2&c=App_Event&eids=611,593,576,636,614,603,639,591,606,594,588,599,615,586,635,646,&m=schdListThrough&tflag=0&sig=fcf84333ac3cc1cb34ee2335d9abff56&c=App_Event&eids=611%2C593%2C576%2C636%2C614%2C603%2C639%2C591%2C606%2C594%2C588%2C599%2C615%2C586%2C635%2C646%2C&m=schdListThrough&tflag=0"
@@ -75,29 +77,18 @@ function getGameDataRender(gameIndex) {
   $http.post({
     url: getUrl,
     header: {
-      "X-Requested-With": "XMLHttpRequest",
-      "Accept": "application/json, text/javascript, */*; q=0.01",
+      "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate",
-      "Accept-Language": "zh-CN,zh;q=0.9",
+      "Accept-Language": "zh-Hans-CN;q=1, en-CN;q=0.9",
       "Connection": "keep-alive",
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      "Cookie": "wanplus_token=748eb4703f9afac18fb4c1330f8556a7; wanplus_storage=lf4m67eka3o; wanplus_sid=df20830483a4ac7ac2ff3712997655e9; wanplus_csrf=_csrf_tk_184373722; wp_pvid=427144384; wp_info=ssid=s1067845980; isShown=1; gameType=2",
       "Host": "www.wanplus.com",
-      "Origin": "http://www.wanplus.com",
-      "Referer": "http://www.wanplus.com/lol/schedule",
-      "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1",
-      "X-CSRF-Token": "184373722"
-    },
-    body: {
-      // eids: "",
-      // game: gameIndex,// 0:All ,1:Dota2 , 2:lol, 4: csgo, 5: OWL, 6:KPL, 8: 使命召唤OL冠军联赛，9：绝地求生
-      // time: chosenTimePeriod,//1525536000  chosenTimePeriod
-      // _gtk: 184373722
+      "User-Agent": "WanPlus/4.1.3 (iPhone; iOS 10.3.3; Scale/2.00)",
     },
     handler: function (resp) {
 
       // console.log("请求到的全部数据：")
       // console.log(resp.data)
+
       $ui.loading(false);//切换比赛成功，隐藏加载中按钮
       // ---定位到今天并render
       var data = resp.data
@@ -227,8 +218,8 @@ function render(resp) {
     obj.everyDate = toDayList[i].date;
     // console.log(obj.everyDate)
 
-    // 特例：绝地求生的比赛需要清空比分
-    var gameTypeInResp = toDayList[i].gametype;
+    // 特例：绝地求生的比赛需要清空比分  
+    var gameTypeInResp = toDayList[i].gametype;// 0:All ,1:Dota2 , 2:lol, 4: csgo, 5: OWL, 6:KPL, 8: 使命召唤OL冠军联赛，9：绝地求生
     if (gameTypeInResp == 9) {
       obj.onewinscore.text = "";
       obj.twowinscore.text = "";
@@ -237,7 +228,7 @@ function render(resp) {
 
 
 
-    // 下面拼接数据用于list显示
+    // ---下面拼接数据用于list显示
     if (i == 0) {//第一个日期
       sectionHeaderArr.push(obj.everyDate)
 
@@ -250,12 +241,13 @@ function render(resp) {
       objOneDay_Rows.push(obj);
     } else {//新的一天
 
-
-
       var elementOneDay = { //这必须是一个obj element好像
         title: sectionHeaderArr[sectionHeaderArr.length - 1],
         rows: objOneDay_Rows
       };
+
+
+
 
       sectionHeaderArr.push(obj.everyDate)
       // push数据
@@ -264,8 +256,17 @@ function render(resp) {
       objOneDay_Rows.push(obj);
     }
 
+    // 特例：push最后一个新的一天的数据，没有这一段则显示不了最后一天的数据
+    if (i == toDayList.length - 1) {
+      var elementOneDay = { //这必须是一个obj element好像
+        title: sectionHeaderArr[sectionHeaderArr.length - 1],
+        rows: objOneDay_Rows
+      };
+      // push数据
+      rowToDayList.push(elementOneDay);
+    }
 
-    // rowToDayList.push(obj); //可以：所有天数放在一列显示
+
   }
 
 
